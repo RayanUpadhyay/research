@@ -17,7 +17,7 @@ An interactive companion to my paper, *Fairness and Dependency Preservation in S
 
 ## The deluxe edition
 
-New runs, clearly separated from the published results and not peer reviewed. 20 seeds per method, the same train/test splits for every method:
+New runs, clearly separated from the published results and not peer reviewed. The experiments were coded and run with AI assistance (Claude). 20 seeds per method, the same train/test splits for every method:
 
 1. **Reproduction** of all five datasets, including TVAE and Gaussian Copula with a current SDV version
 2. **A class-balanced baseline** (class weighting and random oversampling), the fairer comparison the paper calls for
@@ -43,7 +43,11 @@ pip install -r experiments/requirements.txt
 python experiments/experiments.py 20
 ```
 
-Data: German Credit (UCI Statlog), from a public CSV copy with readable labels, in `experiments/data/`.
+## Data and licence
+
+Hofmann, H. (1994). *Statlog (German Credit Data)*. UCI Machine Learning Repository. https://doi.org/10.24432/C5NC77
+
+The dataset is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The copy in `experiments/data/` comes from a public CSV version with readable category labels ([github.com/selva86/datasets](https://github.com/selva86/datasets)); the rows are the same as the UCI original. Some of the readable labels in that copy don't exactly match UCI's own codes (the paper also notes known label problems in this dataset).
 
 ## Tech
 

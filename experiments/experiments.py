@@ -25,7 +25,7 @@ N_SEEDS = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 1
 EPOCHS, BATCH = 300, 500  # the paper's CTGAN/TVAE settings
 
 DEFINITIONS = {
-    'data': 'German Credit (UCI Statlog), 1,000 rows, from a public CSV copy with readable labels.',
+    'data': 'German Credit: Hofmann, H. (1994), Statlog (German Credit Data), UCI Machine Learning Repository, https://doi.org/10.24432/C5NC77, licensed CC BY 4.0. 1,000 rows, used via a public CSV copy with readable category labels (github.com/selva86/datasets).',
     'target': 'bad credit = 1, good credit = 0 (as in the paper).',
     'split': 'stratified 80/20 train/test per seed; generators see only the training split.',
     'model': 'XGBoost with library defaults (the paper used AutoGluon, which selected XGBoost).',
