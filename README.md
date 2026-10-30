@@ -17,7 +17,7 @@ An interactive companion to my paper, *Fairness and Dependency Preservation in S
 
 ## The deluxe edition
 
-New runs, clearly separated from the published results and not peer reviewed. The experiments were coded and run with AI assistance (Claude). 20 seeds per method, the same train/test splits for every method:
+New runs, clearly separated from the published results and not peer reviewed. 20 seeds per method, the same train/test splits for every method:
 
 1. **Reproduction** of all five datasets, including TVAE and Gaussian Copula with a current SDV version
 2. **A class-balanced baseline** (class weighting and random oversampling), the fairer comparison the paper calls for
