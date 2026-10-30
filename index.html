@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fairness and Dependency Preservation in Synthetic Credit Data · Rayan Upadhyay</title>
+<meta name="description" content="An interactive companion to Rayan Upadhyay's NHSJS paper on synthetic credit data, with a deluxe edition of new follow-up experiments.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://research.rayanupadhyay.com/">
+<meta property="og:title" content="Fairness and Dependency Preservation in Synthetic Credit Data">
+<meta property="og:description" content="The paper, made interactive, plus a deluxe edition of new experiments.">
+<meta name="theme-color" content="#0A1033">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230A1033'/%3E%3Ccircle cx='32' cy='32' r='15' fill='none' stroke='%234CC9FF' stroke-width='3'/%3E%3Ccircle cx='32' cy='17' r='4' fill='%234CC9FF'/%3E%3Ccircle cx='45' cy='39' r='4' fill='%232F6BFF'/%3E%3Ccircle cx='19' cy='39' r='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1033; --navy2:#141C52; --blue:#2F6BFF; --cyan:#4CC9FF;
+  --bg:#F3F1FF; --tile:#FFFFFF; --ink:#0E1435; --muted:#5A6185; --line:#E4E0F7; --chip:#EEEBFF;
+  --base:#2F6BFF; --smote:#FF6B3D; --ctgan:#8B5CF6; --tvae:#EC4899; --gc:#F59E0B; --nan:#A1A6BD;
+  --bw:#0EA5E9; --bo:#06B6D4; --rw:#10B981; --snc:#F97316;
+  --sans:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#080C26; --tile:#11173F; --ink:#EEF0FF; --muted:#A5ABD0; --line:#232B63; --chip:#1A2257; --base:#5B8CFF; --ctgan:#A78BFA; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16.5px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-weight:800;letter-spacing:-.025em;line-height:1.1;margin:0}
+.mono{font-family:var(--mono)}
+.tag{display:inline-flex;align-items:center;gap:8px;font:700 12.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.tag:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 18%,transparent)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 22px;border-radius:12px;font:700 15px/1 var(--sans);text-decoration:none;border:0;cursor:pointer;background:var(--blue);color:#fff;box-shadow:0 10px 24px rgba(47,107,255,.35);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.card{background:var(--tile);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:0 1px 0 var(--line),0 20px 40px -28px rgba(20,28,82,.25)}
+section{padding:84px 0}
+.sec-head{max-width:760px;margin-bottom:34px}
+.sec-head.c{text-align:center;margin-left:auto;margin-right:auto}
+.sec-head h2{font-size:clamp(30px,4.2vw,46px);margin-top:14px}
+.sec-head p{color:var(--muted);margin:14px 0 0;font-size:17px}
+.note{font-size:14px;color:var(--muted);margin:16px 0 0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:8px;vertical-align:1px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;color:#fff;background:radial-gradient(60% 70% at 78% 40%,rgba(47,107,255,.45),transparent 60%),radial-gradient(40% 50% at 10% 0%,rgba(76,201,255,.18),transparent 70%),var(--navy);border-radius:0 0 40px 40px}
+.hero:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:28px 28px;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+nav.top{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;height:74px;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;text-decoration:none}
+.logo svg{width:32px;height:32px}
+.links{display:flex;gap:26px;font-size:14.5px;font-weight:600}
+.links a{text-decoration:none;opacity:.75}.links a:hover{opacity:1}
+nav.top .btn{min-height:40px;padding:0 16px;font-size:14px;box-shadow:none}
+@media (max-width:900px){.links{display:none}}
+.hgrid{position:relative;z-index:2;display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding:46px 0 34px}
+.hero .kick{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);font:600 13px/1 var(--sans)}
+.hero .kick b{color:var(--cyan)}
+.hero h1{font-size:clamp(36px,5.2vw,62px);margin-top:22px}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--cyan),#8FB0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .q{font-size:clamp(17px,1.6vw,19px);color:#C8CFF0;max-width:560px;margin:22px 0 0}
+.by{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:24px;font-size:14.5px;color:#C8CFF0}
+.by b{color:#fff}
+.award{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:linear-gradient(90deg,#F7D774,#E8B23A);color:#3A2A00;font-weight:800;font-size:13px}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.orb{position:relative;aspect-ratio:1;width:100%;max-width:520px;justify-self:center}
+.orb canvas{width:100%;height:100%;display:block}
+.orb .chip{position:absolute;padding:10px 14px;border-radius:14px;background:rgba(12,18,60,.7);border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:600 12.5px/1.3 var(--sans);color:#DCE3FF}
+.orb .chip b{display:block;font:500 18px/1.2 var(--mono);color:#fff}
+.stats{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:10px 0 40px;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}
+.stats div{background:rgba(10,16,51,.72);padding:20px 22px}
+.stats b{display:block;font:600 30px/1 var(--sans);letter-spacing:-.02em}
+.stats span{display:block;color:#AEB7E3;font-size:13.5px;margin-top:8px}
+.dates{position:relative;z-index:2;font:500 12.5px/1.6 var(--mono);color:#8E97C8;padding-bottom:30px}
+@media (max-width:900px){.hgrid{grid-template-columns:1fr}.orb{max-width:300px;order:-1;margin:-10px auto -40px}.stats{grid-template-columns:1fr 1fr}}
+
+/* ---------- about ---------- */
+.about{display:grid;grid-template-columns:.95fr 1.05fr;gap:40px;align-items:center}
+.visual{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(150deg,var(--navy2),var(--navy));min-height:420px;padding:26px;color:#fff}
+.visual .lbl{font:600 12.5px/1 var(--sans);color:#AEB7E3;letter-spacing:.06em;text-transform:uppercase}
+.visual .bal{display:flex;height:64px;border-radius:14px;overflow:hidden;margin-top:14px;font:700 14px/1 var(--sans)}
+.visual .bal div{display:grid;place-items:center}
+.visual .float{position:absolute;right:22px;bottom:22px;left:22px;padding:18px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:14.5px;color:#DCE3FF}
+.visual .float b{color:#fff}
+.feat{display:flex;gap:16px;margin-top:22px}
+.feat .ic{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--chip);font-size:24px}
+.feat h3{font-size:19px;letter-spacing:-.01em}
+.feat p{margin:6px 0 0;color:var(--muted)}
+.abstract{margin-top:30px;padding:24px 26px;border-radius:22px;background:var(--tile);border:1px solid var(--line);color:var(--muted);font-size:15.5px}
+.abstract b{color:var(--ink)}
+@media (max-width:900px){.about{grid-template-columns:1fr}.visual{min-height:440px}}
+
+/* ---------- explore list ---------- */
+.explore{border-radius:28px;background:var(--tile);border:1px solid var(--line);overflow:hidden}
+.explore a{display:grid;grid-template-columns:56px 1.1fr 1.6fr 40px;gap:20px;align-items:center;padding:22px 26px;text-decoration:none;border-top:1px solid var(--line);transition:background .2s}
+.explore a:first-child{border-top:0}
+.explore a:hover{background:var(--chip)}
+.explore .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--chip);font-size:22px}
+.explore h3{font-size:18px;letter-spacing:-.01em}
+.explore p{margin:0;color:var(--muted);font-size:15px}
+.explore .ar{font-size:20px;color:var(--blue)}
+.explore .new{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--cyan));color:#fff;font-size:11px;letter-spacing:.06em;vertical-align:3px}
+@media (max-width:760px){.explore a{grid-template-columns:48px 1fr 24px}.explore p{display:none}}
+
+/* ---------- results explorer ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.tabs button{border:1px solid var(--line);border-radius:12px;padding:11px 16px;font:700 14px/1 var(--sans);background:var(--tile);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.tabs button i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.tabs button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 10px 24px -10px rgba(10,16,51,.6)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.metric h3{font-size:16px;letter-spacing:0}
+.metric .v{font:500 30px/1.1 var(--mono);margin-top:10px}
+.metric .v small{font-size:15px;color:var(--muted)}
+.metric .hint{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+.scale{position:relative;height:44px;margin-top:16px}
+.scale .ax{position:absolute;left:0;right:0;top:20px;height:4px;border-radius:4px;background:var(--line)}
+.scale .mk{position:absolute;top:12px;width:4px;height:20px;margin-left:-2px;border-radius:2px;background:var(--c);opacity:.3;transition:left .5s,opacity .3s}
+.scale .mk.on{opacity:1;height:26px;top:9px;width:6px;margin-left:-3px}
+.scale .err{position:absolute;top:18px;height:8px;border-radius:4px;background:var(--c);opacity:0;transition:left .5s,width .5s}
+.scale .lo,.scale .hi{position:absolute;top:30px;font:500 11px/1 var(--mono);color:var(--muted)}.scale .hi{right:0}
+.failed{display:none;padding:22px 24px;border-radius:22px;border:1px dashed var(--nan);color:var(--muted);background:var(--tile)}
+.failed b{color:var(--ink)}
+.explorer.isnan .metrics{opacity:.35;filter:grayscale(1)}
+.explorer.isnan .failed{display:block;margin-bottom:14px}
+.verdict{margin-top:16px}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:12px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th{font:700 12px/1.3 var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:normal;background:var(--chip)}
+td.m{font-family:var(--mono)}
+.tblwrap{overflow-x:auto;margin-top:22px;border:1px solid var(--line);border-radius:20px;background:var(--tile)}
+
+/* ---------- labs ---------- */
+.labs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lab h3{font-size:22px}
+.lab p{color:var(--muted);margin:8px 0 0;font-size:15.5px}
+.sl{margin-top:16px}
+.sl label{display:flex;justify-content:space-between;font-weight:600;font-size:14.5px}
+.sl label span{font-family:var(--mono)}
+input[type=range]{width:100%;accent-color:var(--blue);height:28px}
+.out{margin-top:14px;padding:16px;border-radius:16px;background:var(--chip)}
+.out .big{font:500 34px/1 var(--mono)}
+.out .scale{margin-top:10px}
+.out .you{background:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:8px}
+@media (max-width:860px){.labs{grid-template-columns:1fr}}
+
+/* ---------- dependencies ---------- */
+.deps{display:grid;grid-template-columns:minmax(0,470px) minmax(0,1fr);gap:20px;align-items:start}
+#heat{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;width:100%}
+#heat .h{display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);padding:1px;min-height:34px;font:600 10px/1.1 var(--sans);white-space:nowrap}
+#heat .c{aspect-ratio:1;border-radius:7px;display:grid;place-items:center;font:500 11px/1 var(--mono);cursor:default}
+#heat .c:hover,#heat .c:focus{outline:2px solid var(--ink)}
+#readout{min-height:3.2em;font-size:15px;margin-top:14px}
+.bars .row{display:grid;grid-template-columns:170px 1fr 74px;gap:12px;align-items:center;margin-top:10px;font-size:15px}
+.bars .track{height:14px;border-radius:7px;background:var(--chip);overflow:hidden}
+.bars .fill{height:100%;border-radius:7px;background:var(--c);width:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.bars .nanfill{height:100%;background:repeating-linear-gradient(45deg,var(--line) 0 6px,transparent 6px 12px)}
+.formula{margin-top:18px;font-size:15px;color:var(--muted)}
+.formula ol{margin:8px 0 0;padding-left:20px}
+@media (max-width:900px){.deps{grid-template-columns:1fr}}
+
+/* ---------- method ---------- */
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;counter-reset:s}
+.pipe .st{position:relative;padding:20px 18px 18px;border-radius:20px;background:var(--tile);border:1px solid var(--line);font-size:14.5px;color:var(--muted)}
+.pipe .st:before{counter-increment:s;content:"0" counter(s);display:block;font:500 13px/1 var(--mono);color:var(--blue);margin-bottom:12px}
+.pipe .st b{display:block;font-size:15.5px;color:var(--ink);margin-bottom:6px}
+@media (max-width:900px){.pipe{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pipe{grid-template-columns:1fr}}
+.lims{columns:2 320px;column-gap:28px;padding:0;margin:0;list-style:none}
+.lims li{break-inside:avoid;margin-bottom:14px;color:var(--muted);padding-left:28px;position:relative}
+.lims li:before{content:"!";position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:var(--chip);color:var(--blue);font:800 11px/18px var(--sans);text-align:center}
+.lims li b{color:var(--ink)}
+
+/* ---------- deluxe ---------- */
+.deluxe{background:linear-gradient(180deg,var(--navy) 0,var(--navy2) 420px,var(--bg) 420px)}
+.deluxe .sec-head h2,.deluxe .sec-head .tag{color:#fff}
+.deluxe .sec-head p{color:#C8CFF0}
+.deluxe .tag:before{background:var(--cyan)}
+.warnbox{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#DCE3FF;font-size:15px;max-width:900px}
+.warnbox b{color:#fff}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:30px}
+.dgrid .wide{grid-column:1/-1}
+.exp h3{font-size:22px;margin-top:8px}
+.exp .num{font:500 12.5px/1 var(--mono);color:var(--blue)}
+.exp p{color:var(--muted);margin:10px 0 0;font-size:15.5px}
+.exp .take{margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--chip);font-size:15px;color:var(--ink)}
+.chart{margin-top:16px;width:100%;color:var(--ink)}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font-family:var(--sans);fill:var(--muted);font-size:12px}
+.chart .lab{fill:var(--ink);font-weight:600;font-size:12.5px}
+.mixctl{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.mixctl button{border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:700 13px/1 var(--sans);background:var(--tile);color:var(--ink);cursor:pointer}
+.mixctl button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.mixout{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.mixout div{padding:14px;border-radius:14px;background:var(--chip)}
+.mixout b{display:block;font:500 24px/1.1 var(--mono)}
+.mixout span{font-size:12.5px;color:var(--muted)}
+.mixout small{display:block;font:500 11.5px/1.3 var(--mono);color:var(--muted);margin-top:4px}
+@media (max-width:860px){.dgrid{grid-template-columns:1fr}.mixout{grid-template-columns:1fr}}
+
+/* ---------- cta + footer ---------- */
+.cta{position:relative;overflow:hidden;border-radius:32px;padding:46px;color:#fff;background:radial-gradient(50% 80% at 90% 10%,rgba(76,201,255,.35),transparent 60%),radial-gradient(50% 80% at 0% 100%,rgba(47,107,255,.45),transparent 60%),var(--navy);display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}
+.cta h2{font-size:clamp(28px,3.6vw,42px)}
+.cta p{color:#C8CFF0;margin:14px 0 0}
+.cite{padding:18px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);font-size:14.5px;color:#DCE3FF;overflow-wrap:anywhere}
+.cite .btn{margin-top:14px;min-height:42px}
+@media (max-width:860px){.cta{grid-template-columns:1fr;padding:30px}}
+footer{padding:40px 0 calc(40px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:14.5px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
+@media (max-width:480px){body{font-size:16px}section{padding:60px 0}.card{padding:20px}.bars .row{grid-template-columns:110px 1fr 56px;font-size:14px}.stats b{font-size:24px}.stats div{padding:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <nav class="top" aria-label="Main">
+      <a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="#4CC9FF" stroke-width="2"/><circle cx="16" cy="6" r="3" fill="#4CC9FF"/><circle cx="25" cy="21" r="3" fill="#2F6BFF"/><circle cx="7" cy="21" r="3" fill="#fff"/></svg>research</a>
+      <div class="links"><a href="#about">About</a><a href="#results">Results</a><a href="#metrics">Metrics</a><a href="#deps">Dependencies</a><a href="#deluxe">Deluxe edition</a></div>
+      <a class="btn" href="https://nhsjs.com/2026/fairness-and-dependency-preservation-in-synthetic-credit-data/" target="_blank" rel="noopener">Read the paper</a>
+    </nav>
+    <div class="hgrid" id="top">
+      <div>
+        <span class="kick"><b>●</b> NHSJS Reports · 2026</span>
+        <h1>Fairness and Dependency Preservation in <em>Synthetic Credit Data</em></h1>
+        <p class="q">Can synthetic data safely stand in for real data when you train a loan approval model, without breaking the relationships between applicant features or making the model less fair?</p>
+        <div class="by"><span><b>Rayan Upadhyay</b> · TISB (The International School Bangalore), India</span><span class="award">🥇 Gold CREST Award</span></div>
+        <div class="ctas">
+          <a class="btn" href="#results">Explore the results ↓</a>
+          <a class="btn ghost" href="https://nhsjs.com/wp-content/uploads/2026/07/Fairness-and-Dependency-Preservation-in-Synthetic-Credit-Data.pdf" target="_blank" rel="noopener">PDF ↗</a>
+        </div>
+      </div>
+      <div class="orb" aria-hidden="true">
+        <canvas id="orb" width="1040" height="1040"></canvas>
+        <div class="chip" style="left:2%;top:16%"><b>0.781</b>baseline ROC AUC</div>
+        <div class="chip" style="right:0;bottom:18%"><b>1.0000</b>dependencies kept</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div><b>1,000</b><span>applicants in German Credit</span></div>
+      <div><b>5</b><span>datasets compared</span></div>
+      <div><b>10</b><span>runs per method, different seeds</span></div>
+      <div><b>4</b><span>metrics plus a dependency score</span></div>
+    </div>
+    <div class="dates">Received October 18, 2025 · Accepted March 29, 2026 · Electronic access April 15, 2026</div>
+  </div>
+</header>
+
+<main>
+<section id="about"><div class="wrap about">
+  <div class="visual">
+    <div class="lbl">German Credit, as it comes</div>
+    <div class="bal" id="stackReal"></div>
+    <p class="note" style="color:#AEB7E3" id="realCounts"></p>
+    <div class="lbl" style="margin-top:26px">After synthetic resampling</div>
+    <div class="bal"><div style="flex:50;background:var(--blue)">≈ 50%</div><div style="flex:50;background:var(--smote)">≈ 50%</div></div>
+    <div class="float">Synthetic data fixes the <b>class imbalance</b>. The question is what it breaks along the way: the <b>relationships between features</b>, and the <b>fairness</b> of the model trained on it.</div>
+  </div>
+  <div>
+    <span class="tag">About the study</span>
+    <h2 style="font-size:clamp(30px,4vw,44px);margin-top:14px">A closer look at synthetic data in lending</h2>
+    <div class="feat"><div class="ic">🧩</div><div><h3>Features are tangled together</h3><p>Loan approval models rely on applicant features that depend on each other. Even without sensitive attributes, correlated features can still lead to unfair outcomes.</p></div></div>
+    <div class="feat"><div class="ic">🧪</div><div><h3>Five datasets, one pipeline</h3><p>The original data against SMOTE, CTGAN, TVAE and Gaussian Copula, measured on ROC AUC, three fairness metrics and a Dependency Preservation Score.</p></div></div>
+    <div class="feat"><div class="ic">🛡️</div><div><h3>The real data held up best</h3><p>The baseline kept the relationships and the most stable fairness-utility trade-off. No synthetic method beat it.</p></div></div>
+  </div>
+</div>
+<div class="wrap"><div class="abstract"><b>Abstract.</b> In this study, a baseline ensemble model- trained on the original German Credit dataset without synthetic augmentation- showed the most stable fairness-utility trade-off whereas SMOTE introduced the largest distortions. This study focuses on various techniques for generating synthetic data while preserving feature interdependence during fairness-aware preprocessing of loan approval models. Loan approval models rely on interdependent applicant features. Even without sensitive attributes, correlated features can induce unfair outcomes, making dependency preservation critical. Models were trained on the German Credit dataset without synthetic augmentation and compared against SMOTE, CTGAN, TVAE, and Gaussian Copula on the basis of ROC AUC and standard fairness metrics (comparative analysis only included methods that produced valid synthetic datasets). While the baseline consistently maintained interdependencies and provided stable fairness-utility trade-offs, synthetic methods distorted interdependencies and introduced instabilities, with no single method outperforming the baseline.</div></div>
+</section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="sec-head c"><span class="tag">Explore</span><h2>Explore the study</h2></div>
+  <div class="explore">
+    <a href="#results"><span class="ic">📊</span><h3>Results</h3><p>Every published number, method by method, with the spread across 10 runs.</p><span class="ar">→</span></a>
+    <a href="#metrics"><span class="ic">⚖️</span><h3>The fairness metrics</h3><p>Drag two groups’ rates and watch Disparate Impact and Predictive Parity react.</p><span class="ar">→</span></a>
+    <a href="#deps"><span class="ic">🕸️</span><h3>Dependencies</h3><p>The real relationships in the data, computed live, and the Dependency Preservation Score.</p><span class="ar">→</span></a>
+    <a href="#method"><span class="ic">🧬</span><h3>Method and limitations</h3><p>The pipeline from raw data to metrics, and everything the paper says it couldn’t do.</p><span class="ar">→</span></a>
+    <a href="#deluxe"><span class="ic">✨</span><h3>Deluxe edition<span class="new">NEW</span></h3><p>New follow-up experiments on the questions the paper left open.</p><span class="ar">→</span></a>
+  </div>
+</div></section>
+
+<section id="results" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><span class="tag">Published results</span><h2>Pick a method and see how it did</h2>
+    <p>Every number here is from the paper: the mean ± standard deviation over 10 runs with different random seeds. The faint marks on each scale are the other methods.</p></div>
+  <div class="explorer" id="explorer">
+    <div class="tabs" role="group" aria-label="Choose a method" id="tabs"></div>
+    <div class="failed" id="failed"></div>
+    <div class="metrics" id="metricsGrid"></div>
+    <p class="verdict" id="verdict" aria-live="polite"></p>
+  </div>
+  <div class="tblwrap"><table>
+    <thead><tr><th>Method</th><th>ROC AUC</th><th>Equalized Odds</th><th>Disparate Impact</th><th>Predictive Parity</th><th>Dependency Preservation Score</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table></div>
+  <p class="note">The paper reports no formal significance testing, so the differences are trends rather than statistically confirmed effects. Under a robustness check (normalization, Gaussian noise, small hyperparameter changes and an out-of-sample 80/20 split), SMOTE had a Dependency Preservation Score of 0.6573, and CTGAN was sensitive to small hyperparameter and data-split changes.</p>
+</div></section>
+
+<section id="metrics" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><span class="tag">The metrics</span><h2>What the fairness numbers mean</h2>
+    <p>Move the sliders to build two groups and see how each metric reacts. The marks show where the paper’s three valid methods landed.</p></div>
+  <div class="labs">
+    <div class="card lab">
+      <h3>Disparate Impact</h3>
+      <p>The ratio of desired outcomes (here, approvals) between the protected and unprotected groups. Closer to 1 means fairer.</p>
+      <div class="sl"><label for="diA">Unprotected group approved <span id="diAv"></span></label><input type="range" id="diA" min="10" max="100" value="70"></div>
+      <div class="sl"><label for="diB">Protected group approved <span id="diBv"></span></label><input type="range" id="diB" min="0" max="100" value="60"></div>
+      <div class="out"><div class="big" id="diOut"></div><div class="scale" id="diScale"></div><div class="legend" id="diLegend"></div></div>
+    </div>
+    <div class="card lab">
+      <h3>Predictive Parity</h3>
+      <p>The difference in positive predictive value between groups: of the applicants the model flags, how often it’s right in each group. Lower absolute differences mean better parity.</p>
+      <div class="sl"><label for="ppA">Group 1 predictive value <span id="ppAv"></span></label><input type="range" id="ppA" min="0" max="100" value="80"></div>
+      <div class="sl"><label for="ppB">Group 2 predictive value <span id="ppBv"></span></label><input type="range" id="ppB" min="0" max="100" value="74"></div>
+      <div class="out"><div class="big" id="ppOut"></div><div class="scale" id="ppScale"></div><div class="legend" id="ppLegend"></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3 style="font-size:22px">Equalized Odds</h3>
+    <p style="color:var(--muted);margin:8px 0 0">Measures differences in error rates (true positive and false positive rates) across groups. Lower values mean more equitable performance. The baseline scored <b class="mono">0.081 ± 0.007</b>, SMOTE <b class="mono">0.118 ± 0.013</b> and CTGAN <b class="mono">0.102 ± 0.011</b>.</p>
+    <p class="note">Disparate Impact and Equalized Odds were computed mainly for <span class="mono">personal_status_sex</span> and <span class="mono">foreign_worker</span>; Predictive Parity and Equalized Odds for <span class="mono">credit_history</span> and <span class="mono">employment_since</span>. The first category of each attribute is the reference group for ratio-based measures.</p>
+  </div>
+</div></section>
+
+<section id="deps" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><span class="tag">Dependencies</span><h2>The relationships synthetic data has to keep</h2>
+    <p>The real relationships between the numeric columns in German Credit, computed live in your browser from all 1,000 applicants. Each cell is a Spearman rank correlation. Hover or tap a cell to read it.</p></div>
+  <div class="deps">
+    <div class="card"><div id="heat" role="img" aria-label="Spearman correlation heatmap of the German Credit numeric columns"></div><div id="readout" aria-live="polite"></div></div>
+    <div class="card">
+      <h3 style="font-size:22px">Dependency Preservation Score</h3>
+      <div class="bars" id="dpsBars"></div>
+      <div class="formula">How the paper defines it:
+        <ol>
+          <li>For numerical features, Spearman correlation coefficients were computed for all feature pairs between the original and synthetic datasets, and their mean is the numerical dependency score.</li>
+          <li>For categorical features, Cramér’s V was computed for all feature pairs, and its mean is the categorical dependency score.</li>
+          <li>The final score averages the two. A companion measure, the Frobenius norm of the difference between the original and synthetic Spearman matrices, gives the overall distance; lower is better.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <p class="note">The heatmap covers the seven numeric columns only. The paper’s score also includes the categorical columns through Cramér’s V.</p>
+</div></section>
+
+<section id="method" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><span class="tag">Method</span><h2>The pipeline</h2></div>
+  <div class="pipe">
+    <div class="st"><b>German Credit (UCI Statlog)</b>Target mapped to good credit = 0, bad credit = 1.</div>
+    <div class="st"><b>Preprocessing</b>One-hot encoding, with sensitive features such as gender and foreign_worker kept for fairness analysis.</div>
+    <div class="st"><b>Synthetic data</b>Baseline (none), SMOTE, CTGAN, TVAE, Gaussian Copula. CTGAN and TVAE: default settings, 300 epochs, batch size 500.</div>
+    <div class="st"><b>AutoGluon ensemble</b>XGBoost, Random Forest, LightGBM, CatBoost and a PyTorch neural network; the selected model was XGBoost, stacking disabled.</div>
+    <div class="st"><b>Evaluation</b>ROC AUC, Equalized Odds, Disparate Impact, Predictive Parity and dependency preservation. 80/20 split, 10 runs.</div>
+  </div>
+  <div class="card" style="margin-top:22px" id="limits">
+    <h3 style="font-size:24px;margin-bottom:18px">Limitations the paper names</h3>
+    <ul class="lims">
+      <li><b>TVAE and Gaussian Copula failed.</b> Both produced NaN for every metric because the synthetic data itself was invalid (for example constant columns, empty subgroups or undefined values).</li>
+      <li><b>Small dataset.</b> Models trained on 800–1120 samples and were validated on 200–280, so a few errors can move the fairness estimates.</li>
+      <li><b>No significance testing.</b> Results are means and standard deviations over 10 runs, so they should be read as trends.</li>
+      <li><b>Imbalanced baseline.</b> The baseline used the original 70/30 data while the synthetic methods were balanced, which is not a like-for-like comparison.</li>
+      <li><b>Default generator settings.</b> CTGAN and TVAE used default architectures and hyperparameters, with no tuning.</li>
+      <li><b>One selected model.</b> Results come from the single model AutoGluon selected (XGBoost).</li>
+      <li><b>Messy attributes.</b> foreign_worker is mislabeled in the UCI version, and personal status and sex are combined into one attribute.</li>
+      <li><b>No privacy check.</b> Privacy leakage, such as membership inference, was not measured.</li>
+    </ul>
+    <p class="note" style="font-size:15.5px;color:var(--ink)"><b>Bottom line from the paper:</b> for fairness-critical applications like loan approval, it may be safer to rely on the original data with fairness-aware preprocessing than on synthetic data generation, which introduces dependency distortions and fairness instability, albeit improving class balance.</p>
+  </div>
+</div></section>
+
+<!-- ======================= DELUXE ======================= -->
+<section id="deluxe" class="deluxe"><div class="wrap">
+  <div class="sec-head"><span class="tag">Deluxe edition</span><h2>Picking up where the paper stopped</h2>
+    <p>New experiments on the open questions from the paper’s limitations and future work.</p></div>
+  <div class="warnbox"><span>⚠️</span><div><b>These are new runs, not the published results.</b> They are a companion analysis made for this page and have not been peer reviewed. The published numbers above are unchanged. The paper leaves some details open, so each experiment states its exact definitions, and the absolute numbers here are not directly comparable with the paper’s. <span id="dxMeta"></span></div></div>
+  <div class="dgrid" id="dgrid"><div class="card exp wide">
+  <span class="num">EXPERIMENT 01 · REPRODUCTION</span>
+  <h3>Running the study again, from scratch</h3>
+  <p>The same five datasets, trained and tested again with XGBoost over the same 80/20 split design. TVAE and Gaussian Copula get another try with a current version of the SDV library. Published values are on the left of each pair; this re-run is in bold.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>Method</th><th>ROC AUC<br>paper</th><th>ROC AUC<br>re-run</th><th>Disparate Impact<br>paper</th><th>Disparate Impact<br>re-run</th><th>Equalized Odds<br>paper</th><th>Equalized Odds<br>re-run</th></tr></thead>
+    <tbody id="reproTable"></tbody>
+  </table></div>
+  <div class="take"><b>Accuracy reproduces closely; fairness is noisier.</b> ROC AUC lands within about 0.01 of the paper: 0.770 vs 0.781 for the baseline, 0.765 vs 0.764 for SMOTE, 0.756 vs 0.751 for CTGAN, and the baseline again scores highest. This time TVAE and Gaussian Copula ran, but TVAE’s bad-credit rows were degenerate in all 20 runs (<span class="mono">savings</span>, <span class="mono">other_debtors</span> and <span class="mono">foreign_worker</span> never varied), the same kind of failure behind the paper’s NaNs. Gaussian Copula produced valid data every time. The fairness numbers differ more, because the paper’s exact fairness definitions and groups aren’t fully specified, and they swing a lot from run to run on a 200-applicant test set.</div>
+</div>
+
+<div class="card exp">
+  <span class="num">EXPERIMENT 02 · A FAIR FIGHT</span>
+  <h3>Does a balanced baseline change the story?</h3>
+  <p>The paper notes its baseline trained on imbalanced 70/30 data while the synthetic methods trained on balanced data. Here the original data is balanced too, by class weighting and by plain random oversampling, with no new rows invented.</p>
+  <div class="chart" data-dot="baseline,baseline_weighted,baseline_oversampled,smote,smotenc,ctgan,tvae,gaussian_copula:auc" data-title="ROC AUC by method"></div>
+  <div class="take"><b>Balancing the real data is enough.</b> With no rows invented, the class-weighted baseline scores ROC AUC 0.772 and the oversampled one 0.769, level with the imbalanced baseline (0.770) and at or above every synthetic method. So, for accuracy at least, the baseline’s edge in the paper doesn’t look like an artefact of the imbalance.</div>
+</div>
+
+<div class="card exp">
+  <span class="num">EXPERIMENT 03 · FAIRNESS</span>
+  <h3>Disparate Impact for women vs men</h3>
+  <p>Approval rate for women divided by approval rate for men, in each method’s model. The dashed line at 1 is equal treatment.</p>
+  <div class="chart" data-dot="baseline,baseline_weighted,baseline_oversampled,reweighing,smote,smotenc,ctgan,tvae,gaussian_copula:di" data-ref="1" data-ref-label="equal (1.0)" data-title="Disparate Impact by method"></div>
+  <div class="take"><b>No synthetic method moves the needle.</b> Every method lands between 0.844 (TVAE) and 0.909 (reweighing), and the error bars overlap. None of the synthetic methods is significantly different from the baseline on Disparate Impact; the only significant improvement is reweighing (experiment 05).</div>
+</div>
+
+<div class="card exp wide">
+  <span class="num">EXPERIMENT 04 · THE SYNTHETIC SLIDER</span>
+  <h3>How much synthetic data can a model take?</h3>
+  <p>Start with the real training set and swap a growing share of its rows for synthetic ones from each generator, keeping the size the same. At 100%, the model never sees a real applicant. Every model is tested on the same real held-out applicants. Points were measured at 0, 25, 50, 75 and 100%; the slider reads between them.</p>
+  <div class="mixctl" id="mixGen" role="group" aria-label="Choose a generator"><button type="button" data-g="ctgan" aria-pressed="true">CTGAN</button><button type="button" data-g="tvae" aria-pressed="false">TVAE</button><button type="button" data-g="gaussian_copula" aria-pressed="false">Gaussian Copula</button></div>
+  <div class="sl"><label for="mixSlider">Synthetic share of the training data <span id="mixPct"></span></label><input type="range" id="mixSlider" min="0" max="100" value="0"></div>
+  <div class="mixout"><div><span>ROC AUC</span><b id="mixAuc"></b><small id="mixAucn"></small></div><div><span>Disparate Impact</span><b id="mixDi"></b><small id="mixDin"></small></div><div><span>Equalized Odds</span><b id="mixEo"></b><small id="mixEon"></small></div></div>
+  <div class="chart" id="mixChart"></div>
+  <div class="take"><b>Swap in too much and the model stops working.</b> CTGAN and Gaussian Copula lose accuracy steadily as synthetic rows replace real ones. At 100% synthetic, CTGAN’s ROC AUC is 0.497, no better than a coin flip, and Gaussian Copula’s is 0.571. TVAE holds up far better (0.742 at 100%). Disparate Impact drifts toward 1 as the synthetic share grows, but read that carefully: for CTGAN it happens as the model stops working, and a model that approves people at random treats every group the same.</div>
+</div>
+
+<div class="card exp">
+  <span class="num">EXPERIMENT 05 · THE PAPER’S RECOMMENDATION</span>
+  <h3>Original data with fairness-aware preprocessing</h3>
+  <p>The paper concludes that real data with fairness-aware preprocessing may be the safer path. Here that is tested with reweighing (Kamiran and Calders), which weights each sex and outcome combination so the two are independent in training.</p>
+  <div class="chart" data-dot="baseline,reweighing:eo" data-title="Equalized Odds, baseline vs reweighing"></div>
+  <div class="take"><b>The paper’s recommendation holds up.</b> Reweighing kept ROC AUC level with the baseline (0.771 vs 0.770) while improving both fairness measures: Disparate Impact rose from 0.866 to 0.909 (p = 0.004) and Equalized Odds fell from 0.191 to 0.139 (p = 0.017). It was the only approach in these runs to significantly improve both, without inventing any data.</div>
+</div>
+
+<div class="card exp">
+  <span class="num">EXPERIMENT 06 · SIGNIFICANCE</span>
+  <h3>Which differences are more than noise?</h3>
+  <p>Paired Wilcoxon signed-rank tests across seeds, each method against the original-data baseline. A ✓ marks p &lt; 0.05. With this few runs and no correction for multiple tests, treat a single ✓ as a hint, not proof.</p>
+  <div class="tblwrap"><table><thead><tr><th>Method</th><th>ROC AUC</th><th>Disparate Impact</th><th>Equalized Odds</th><th>Predictive Parity</th></tr></thead><tbody id="sigTable"></tbody></table></div>
+  <div class="take"><b>What survives the test.</b> On accuracy, CTGAN (p = 0.044) and Gaussian Copula (p = 0.003) are significantly below the baseline; SMOTE (p = 0.062) and TVAE (p = 0.985) are not. On fairness, no synthetic method differs significantly from the baseline on Disparate Impact; SMOTE-NC has a smaller Equalized Odds gap (p = 0.027). Reweighing is the standout on both fairness measures.</div>
+</div>
+
+<div class="card exp">
+  <span class="num">EXPERIMENT 07 · DEPENDENCIES, RE-MEASURED</span>
+  <h3>How much structure each generator keeps</h3>
+  <p>Our implementation of the Dependency Preservation Score as the paper describes it (1 means the synthetic rows keep exactly the real relationships), measured on rows each generator produced.</p>
+  <div class="bars" id="dpsNew"></div>
+  <p style="margin-top:18px">Frobenius distance between the real and synthetic Spearman matrices (lower is closer):</p>
+  <div class="bars" id="frobNew"></div>
+  <div class="take"><b>Compare the ranking, not the values.</b> By our reading of the score, every generator keeps most pairwise structure (0.912 to 0.936), far above the paper’s 0.5365 and 0.3986, so the exact formula clearly differs. The Frobenius distance separates them more: CTGAN distorts the numeric relationships most (1.162), in line with its low score in the paper, while Gaussian Copula keeps them best (0.613).</div>
+</div>
+
+<div class="card exp">
+  <span class="num">EXPERIMENT 08 · A FIRST PRIVACY CHECK</span>
+  <h3>Do synthetic rows sit too close to real people?</h3>
+  <p>The paper didn’t measure privacy. A simple first check is the distance from each synthetic row to its nearest real training row, compared with how close genuinely new real applicants (the held-out set) sit. Much closer than real newcomers suggests copying.</p>
+  <div class="bars" id="privBars"></div>
+  <div class="take"><b>No copies, but some rows sit close to real people.</b> No method copied a real applicant exactly. SMOTE rows sit at a median distance of 3.00 from their nearest real applicant and TVAE rows at 3.69, both much closer than genuinely new applicants (5.70). SMOTE builds every row between two real people, so that is expected. CTGAN (6.65) and Gaussian Copula (6.32) sit about as far away as new applicants do, and SMOTE-NC sits furthest (11.14) because it creates unusual combinations of categories. This is a first check, not a privacy guarantee.</div>
+</div>
+</div>
+  <details class="card" style="margin-top:16px"><summary style="cursor:pointer;font-weight:700">Exact definitions used in the deluxe experiments</summary><dl id="defs" style="margin:14px 0 0;font-size:14.5px;color:var(--muted)"></dl></details>
+</div></section>
+
+<section style="padding-top:20px" id="cite"><div class="wrap">
+  <div class="cta">
+    <div><span class="tag" style="color:var(--cyan)">Read the full paper</span><h2 style="margin-top:14px">The whole study, in the journal</h2><p>Published in NHSJS Reports, The National High School Journal of Science, and awarded a Gold CREST Award.</p>
+      <div class="ctas"><a class="btn" href="https://nhsjs.com/2026/fairness-and-dependency-preservation-in-synthetic-credit-data/" target="_blank" rel="noopener">Read on NHSJS ↗</a><a class="btn ghost" href="https://nhsjs.com/wp-content/uploads/2026/07/Fairness-and-Dependency-Preservation-in-Synthetic-Credit-Data.pdf" target="_blank" rel="noopener">PDF ↗</a></div></div>
+    <div class="cite"><span id="citeText">Upadhyay, R. (2026). Fairness and Dependency Preservation in Synthetic Credit Data. <i>NHSJS Reports, The National High School Journal of Science</i>. https://nhsjs.com/2026/fairness-and-dependency-preservation-in-synthetic-credit-data/</span><br><button class="btn" id="copy" type="button">Copy citation</button></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>By <a href="https://rayanupadhyay.com">Rayan Upadhyay</a>. Published results and quotes are from the paper; the heatmap is computed from the German Credit dataset; the deluxe edition is new and labelled as such.</span>
+  <span><a href="https://nhsjs.com/2026/fairness-and-dependency-preservation-in-synthetic-credit-data/" target="_blank" rel="noopener">NHSJS</a> · <a href="https://rayanupadhyay.com">rayanupadhyay.com</a></span>
+</div></footer>
+
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- hero orb: a slowly turning sphere of connected points ---------- */
+(function orb(){
+  const cv = $('orb'), g = cv.getContext('2d'), W = cv.width, N = 170, R = W * 0.4;
+  const pts = [], ga = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) { const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = ga * i; pts.push([Math.cos(th) * r, y, Math.sin(th) * r]); }
+  const edges = [];
+  for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) { const d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1], pts[i][2] - pts[j][2]); if (d < 0.32) edges.push([i, j]); }
+  let a = 0.6, visible = true;
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible && !reduce) requestAnimationFrame(draw); }).observe(cv);
+  function draw(){
+    g.clearRect(0, 0, W, W);
+    const glow = g.createRadialGradient(W / 2, W / 2, R * 0.2, W / 2, W / 2, R * 1.3);
+    glow.addColorStop(0, 'rgba(76,201,255,.28)'); glow.addColorStop(1, 'rgba(47,107,255,0)');
+    g.fillStyle = glow; g.fillRect(0, 0, W, W);
+    const ca = Math.cos(a), sa = Math.sin(a), ct = Math.cos(0.42), st = Math.sin(0.42);
+    const P = pts.map(([x, y, z]) => { const x1 = x * ca + z * sa, z1 = -x * sa + z * ca, y1 = y * ct - z1 * st, z2 = y * st + z1 * ct, s = 1 / (1.9 - z2 * 0.5); return [W / 2 + x1 * R * s * 1.25, W / 2 + y1 * R * s * 1.25, z2]; });
+    g.lineWidth = 1.6;
+    for (const [i, j] of edges) { const z = (P[i][2] + P[j][2]) / 2; g.strokeStyle = `rgba(120,190,255,${0.08 + (z + 1) * 0.22})`; g.beginPath(); g.moveTo(P[i][0], P[i][1]); g.lineTo(P[j][0], P[j][1]); g.stroke(); }
+    for (let i = 0; i < N; i++) { const [x, y, z] = P[i]; g.fillStyle = i % 9 === 0 ? `rgba(255,255,255,${0.5 + z * 0.4})` : `rgba(76,201,255,${0.35 + (z + 1) * 0.3})`; g.beginPath(); g.arc(x, y, 3 + (z + 1) * 3.2, 0, 7); g.fill(); }
+    if (!reduce && visible) { a += 0.0035; requestAnimationFrame(draw); }
+  }
+  draw();
+})();
+
+/* ---------- published results, exactly as printed ---------- */
+const M = [
+  { id: 'base', name: 'Baseline', long: 'Baseline (no synthetic data)', c: 'var(--base)', auc: [0.781, 0.012], eo: [0.081, 0.007], di: [0.912, 0.022], pp: [0.035, 0.006], dps: 1.0000,
+    say: 'Preserved natural interdependencies, maintained a stable fairness-utility trade-off, high ROC AUC and low disparities.' },
+  { id: 'smote', name: 'SMOTE', long: 'SMOTE', c: 'var(--smote)', auc: [0.764, 0.018], eo: [0.118, 0.013], di: [0.841, 0.029], pp: [0.052, 0.010], dps: 0.5365,
+    say: 'Improved class balance but disrupted key dependencies, amplifying fairness disparities.' },
+  { id: 'ctgan', name: 'CTGAN', long: 'CTGAN', c: 'var(--ctgan)', auc: [0.751, 0.021], eo: [0.102, 0.011], di: [0.857, 0.026], pp: [0.045, 0.009], dps: 0.3986,
+    say: 'Partially preserved complex nonlinear dependencies but introduced instability in fairness metrics across runs.' },
+  { id: 'tvae', name: 'TVAE', long: 'TVAE', c: 'var(--nan)', nan: true },
+  { id: 'gc', name: 'Gaussian Copula', long: 'Gaussian Copula', c: 'var(--nan)', nan: true }
+];
+const KEYS = [
+  { k: 'auc', name: 'ROC AUC', lo: 0.70, hi: 0.80, hint: 'How well the model ranks good and bad credit. Higher is better.' },
+  { k: 'eo', name: 'Equalized Odds', lo: 0.05, hi: 0.15, hint: 'Gap in error rates between groups. Lower is fairer.' },
+  { k: 'di', name: 'Disparate Impact', lo: 0.80, hi: 1.00, hint: 'Ratio of approvals between groups. Closer to 1 is fairer.' },
+  { k: 'pp', name: 'Predictive Parity', lo: 0.02, hi: 0.07, hint: 'Gap in positive predictive value. Lower is fairer.' },
+  { k: 'dps', name: 'Dependency Preservation', lo: 0, hi: 1, hint: 'How well relationships between features were kept. The baseline is the reference at 1.' }
+];
+const f3 = v => v.toFixed(3), pct = (v, s) => ((v - s.lo) / (s.hi - s.lo)) * 100;
+$('tbody').innerHTML = M.map(m => `<tr><td><span class="dot" style="--c:${m.c}"></span>${m.long}</td>` +
+  (m.nan ? '<td class="m">NaN</td>'.repeat(5) : ['auc', 'eo', 'di', 'pp'].map(k => `<td class="m">${f3(m[k][0])} ± ${f3(m[k][1])}</td>`).join('') + `<td class="m">${m.dps.toFixed(4)}</td>`) + '</tr>').join('');
+const tabs = $('tabs'), grid = $('metricsGrid');
+M.forEach(m => { const b = document.createElement('button'); b.type = 'button'; b.dataset.id = m.id; b.style.setProperty('--c', m.c); b.innerHTML = `<i></i>${m.name}`; b.setAttribute('aria-pressed', 'false'); b.onclick = () => pick(m.id); tabs.appendChild(b); });
+KEYS.forEach(s => {
+  const d = document.createElement('div'); d.className = 'card metric'; d.id = 'm-' + s.k;
+  const marks = M.filter(m => !m.nan).map(m => `<span class="err" data-m="${m.id}" style="--c:${m.c}"></span><span class="mk" data-m="${m.id}" style="--c:${m.c}"></span>`).join('');
+  d.innerHTML = `<h3>${s.name}</h3><div class="v"></div><p class="hint">${s.hint}</p><div class="scale"><div class="ax"></div>${marks}<span class="lo">${s.lo}</span><span class="hi">${s.hi}</span></div>`;
+  grid.appendChild(d);
+});
+KEYS.forEach(s => M.filter(m => !m.nan).forEach(m => {
+  const v = s.k === 'dps' ? [m.dps, 0] : m[s.k];
+  document.querySelector(`#m-${s.k} .mk[data-m="${m.id}"]`).style.left = pct(v[0], s) + '%';
+  const er = document.querySelector(`#m-${s.k} .err[data-m="${m.id}"]`), a = Math.max(0, pct(v[0] - v[1], s)), b = Math.min(100, pct(v[0] + v[1], s));
+  er.style.left = a + '%'; er.style.width = (b - a) + '%';
+}));
+function pick(id){
+  const m = M.find(x => x.id === id);
+  tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+  $('explorer').classList.toggle('isnan', !!m.nan);
+  if (m.nan) {
+    $('failed').innerHTML = `<b>${m.name} produced NaN for every metric.</b> It failed to generate evaluable synthetic data in the main experiment: the output contained degenerate or invalid feature distributions (for example constant columns, empty subgroup categories or undefined values), so the metrics couldn’t be computed. The failure happened during data generation, before any metric was calculated, so ${m.name} was left out of the comparison. <a href="#deluxe">The deluxe edition tries it again →</a>`;
+    $('verdict').textContent = '';
+    KEYS.forEach(s => { document.querySelector(`#m-${s.k} .v`).innerHTML = 'NaN'; });
+  } else {
+    KEYS.forEach(s => {
+      document.querySelector(`#m-${s.k} .v`).innerHTML = s.k === 'dps' ? m.dps.toFixed(4) : `${f3(m[s.k][0])} <small>± ${f3(m[s.k][1])}</small>`;
+      document.querySelectorAll(`#m-${s.k} .mk, #m-${s.k} .err`).forEach(e => e.classList.toggle('on', e.dataset.m === id));
+      document.querySelectorAll(`#m-${s.k} .err`).forEach(e => e.style.opacity = e.dataset.m === id ? .28 : 0);
+    });
+    $('verdict').innerHTML = `<b>${m.name}:</b> ${m.say}`;
+  }
+}
+pick('base');
+
+/* ---------- slider labs ---------- */
+function labScale(el, legendEl, s, marks){
+  el.innerHTML = '<div class="ax"></div>' + marks.map(m => `<span class="mk on" style="--c:${m.c};left:${pct(m.v, s)}%" title="${m.name}"></span>`).join('') +
+    `<span class="mk on you" id="${el.id}You"></span><span class="lo">${s.lo}</span><span class="hi">${s.hi}</span>`;
+  legendEl.innerHTML = marks.map(m => `<span><span class="dot" style="--c:${m.c}"></span>${m.name} ${m.v.toFixed(3)}</span>`).join('') + '<span><span class="dot" style="--c:var(--ink)"></span>yours</span>';
+}
+const valid = M.filter(m => !m.nan), DIS = { lo: 0, hi: 1.2 }, PPS = { lo: 0, hi: 0.3 };
+labScale($('diScale'), $('diLegend'), DIS, valid.map(m => ({ name: m.name, c: m.c, v: m.di[0] })));
+labScale($('ppScale'), $('ppLegend'), PPS, valid.map(m => ({ name: m.name, c: m.c, v: m.pp[0] })));
+function di(){ const a = +$('diA').value, b = +$('diB').value, r = b / a; $('diAv').textContent = a + '%'; $('diBv').textContent = b + '%'; $('diOut').textContent = r.toFixed(3); $('diScaleYou').style.left = Math.min(100, pct(r, DIS)) + '%'; }
+function pp(){ const a = +$('ppA').value / 100, b = +$('ppB').value / 100, d = Math.abs(a - b); $('ppAv').textContent = Math.round(a * 100) + '%'; $('ppBv').textContent = Math.round(b * 100) + '%'; $('ppOut').textContent = d.toFixed(3); $('ppScaleYou').style.left = Math.min(100, pct(d, PPS)) + '%'; }
+['diA', 'diB'].forEach(i => $(i).addEventListener('input', di)); ['ppA', 'ppB'].forEach(i => $(i).addEventListener('input', pp)); di(); pp();
+
+/* ---------- dependencies: live Spearman on the real data ---------- */
+const D = {"duration":[6,48,12,42,24,36,24,36,12,30,12,48,12,24,15,24,24,30,24,24,9,6,10,12,10,6,6,12,7,60,18,24,18,12,12,45,48,18,10,9,30,12,18,30,48,11,36,6,11,12,24,27,12,18,36,6,12,36,18,36,9,15,36,48,24,27,12,12,36,36,36,7,8,42,36,12,42,11,54,30,24,15,18,24,10,12,18,36,18,12,12,12,12,24,12,54,12,18,36,20,24,36,6,9,12,24,18,12,24,14,6,15,18,36,12,48,42,10,33,12,21,24,12,10,18,12,12,12,12,12,48,36,15,18,60,12,27,12,15,12,6,36,27,18,21,48,6,12,36,18,6,10,36,24,24,12,9,12,24,6,24,18,15,10,36,6,18,11,24,24,15,12,24,8,21,30,12,6,12,21,36,36,21,24,18,15,9,16,12,18,24,48,27,6,45,9,6,12,24,18,9,12,27,12,12,30,12,12,24,12,9,36,27,30,36,6,18,36,24,10,12,12,12,24,15,36,48,12,9,24,36,9,12,18,4,24,6,21,12,30,24,6,48,12,12,24,12,6,24,18,6,12,30,24,9,60,24,12,15,11,12,24,18,12,10,15,36,24,14,24,18,12,48,48,30,9,18,12,6,24,15,12,18,15,24,47,48,48,12,24,12,36,24,42,48,48,12,10,18,21,6,36,24,10,48,6,30,12,8,9,48,24,24,12,4,36,12,24,12,15,30,24,24,18,18,8,12,24,36,6,24,18,60,48,24,6,13,15,24,10,24,21,18,18,10,15,13,24,6,9,9,9,18,12,10,24,12,36,12,30,18,12,12,6,18,12,18,18,36,18,36,18,10,60,60,48,18,7,36,6,20,18,22,12,30,18,18,18,15,9,18,12,36,6,9,39,12,36,12,24,18,18,24,14,18,24,24,15,24,12,24,33,12,10,24,36,12,18,21,18,15,12,12,21,12,18,28,18,9,18,5,24,6,24,9,12,6,24,42,12,12,12,20,12,48,9,36,7,12,15,36,6,12,24,24,24,11,12,6,18,36,15,12,12,18,24,24,48,33,24,24,6,9,6,18,18,39,24,12,15,12,24,30,15,12,6,12,24,10,6,12,27,6,6,12,24,36,24,18,6,24,36,9,24,24,10,15,15,24,39,12,36,15,12,24,6,6,36,6,6,24,18,48,24,18,26,15,4,36,6,36,15,12,24,24,21,6,18,48,18,12,24,30,18,12,24,24,24,12,48,12,6,48,12,9,12,18,21,24,18,24,24,6,36,24,24,12,24,48,48,24,30,24,15,9,15,12,24,36,24,18,12,9,36,12,18,9,12,18,12,12,24,21,24,24,6,24,24,18,24,7,9,24,36,10,24,24,36,18,15,12,10,21,24,18,48,60,6,30,12,21,18,48,12,18,15,6,9,42,9,24,18,15,9,24,12,24,60,12,42,18,15,15,24,18,36,30,12,24,12,48,12,24,36,24,14,12,48,30,18,12,12,21,6,6,24,30,48,12,30,24,36,60,6,21,30,24,72,24,18,6,12,15,24,36,60,10,36,9,12,15,15,24,6,24,6,12,12,18,15,12,48,24,30,27,15,48,12,9,9,18,6,21,9,60,30,30,18,24,20,9,6,12,9,27,6,15,18,48,24,24,24,8,24,4,36,24,18,6,30,24,10,21,24,39,13,15,12,21,15,6,18,12,30,12,24,6,15,24,12,15,18,12,21,24,12,30,10,12,12,24,36,21,24,12,24,36,18,36,18,39,24,12,12,20,18,22,48,48,40,21,24,6,24,24,9,18,12,24,9,24,18,20,12,12,36,6,12,42,15,8,6,36,48,48,36,6,6,36,18,12,12,36,8,18,21,18,18,36,48,24,18,45,24,15,12,12,4,24,24,36,21,18,24,18,21,18,24,9,12,20,24,15,18,36,24,10,15,15,9,24,18,24,27,10,15,18,12,36,12,36,6,24,15,12,11,18,36,9,30,24,24,30,18,24,12,24,48,36,28,27,15,12,36,18,36,21,12,15,18,16,20,36,15,24,12,21,36,15,9,36,24,30,11,24,48,10,6,24,24,18,48,9,12,24,12,18,48,30,12,24,9,9,12,12,30,9,6,60,24,12,10,24,4,15,48,24,12,18,24,18,36,24,36,12,24,30,9,28,24,6,21,15,24,6,30,27,15,42,11,15,24,24,60,30,24,6,18,24,15,30,48,21,36,24,15,42,13,24,24,12,15,18,36,12,12,30,12,45,45],"amount":[1169,5951,2096,7882,4870,9055,2835,6948,3059,5234,1295,4308,1567,1199,1403,1282,2424,8072,12579,3430,2134,2647,2241,1804,2069,1374,426,409,2415,6836,1913,4020,5866,1264,1474,4746,6110,2100,1225,458,2333,1158,6204,6187,6143,1393,2299,1352,7228,2073,2333,5965,1262,3378,2225,783,6468,9566,1961,6229,1391,1537,1953,14421,3181,5190,2171,1007,1819,2394,8133,730,1164,5954,1977,1526,3965,4771,9436,3832,5943,1213,1568,1755,2315,1412,1295,12612,2249,1108,618,1409,797,3617,1318,15945,2012,2622,2337,7057,1469,2323,932,1919,2445,11938,6458,6078,7721,1410,1449,392,6260,7855,1680,3578,7174,2132,4281,2366,1835,3868,1768,781,1924,2121,701,639,1860,3499,8487,6887,2708,1984,10144,1240,8613,766,2728,1881,709,4795,3416,2462,2288,3566,860,682,5371,1582,1346,1924,5848,7758,6967,1282,1288,339,3512,1898,2872,1055,1262,7308,909,2978,1131,1577,3972,1935,950,763,2064,1414,3414,7485,2577,338,1963,571,9572,4455,1647,3777,884,1360,5129,1175,674,3244,4591,3844,3915,2108,3031,1501,1382,951,2760,4297,936,1168,5117,902,1495,10623,1935,1424,6568,1413,3074,3835,5293,1908,3342,932,3104,3913,3021,1364,625,1200,707,2978,4657,2613,10961,7865,1478,3149,4210,2507,2141,866,1544,1823,14555,2767,1291,2522,915,1595,4605,1185,3447,1258,717,1204,1925,433,666,2251,2150,4151,2030,7418,2684,2149,3812,1154,1657,1603,5302,2748,1231,802,6304,1533,8978,999,2662,1402,12169,3060,11998,2697,2404,1262,4611,1901,3368,1574,1445,1520,3878,10722,4788,7582,1092,1024,1076,9398,6419,4796,7629,9960,4675,1287,2515,2745,672,3804,1344,1038,10127,1543,4811,727,1237,276,5381,5511,3749,685,1494,2746,708,4351,701,3643,4249,1938,2910,2659,1028,3398,5801,1525,4473,1068,6615,1864,7408,11590,4110,3384,2101,1275,4169,1521,5743,3599,3213,4439,3949,1459,882,3758,1743,1136,1236,959,3229,6199,727,1246,2331,4463,776,2406,1239,3399,2247,1766,2473,1542,3850,3650,3446,3001,3079,6070,2146,13756,14782,7685,2320,846,14318,362,2212,12976,1283,1330,4272,2238,1126,7374,2326,1449,1820,983,3249,1957,2406,11760,2578,2348,1223,1516,1473,1887,8648,802,2899,2039,2197,1053,3235,939,1967,7253,2292,1597,1381,5842,2579,8471,2782,1042,3186,2028,958,1591,2762,2779,2743,1149,1313,1190,3448,11328,1872,2058,2136,1484,660,1287,3394,609,1884,1620,2629,719,5096,1244,1842,2576,1424,1512,11054,518,2759,2670,4817,2679,3905,3386,343,4594,3620,1721,3017,754,1950,2924,1659,7238,2764,4679,3092,448,654,1238,1245,3114,2569,5152,1037,1478,3573,1201,3622,960,1163,1209,3077,3757,1418,3518,1934,8318,1237,368,2122,2996,9034,1585,1301,1323,3123,5493,1126,1216,1207,1309,2360,6850,1413,8588,759,4686,2687,585,2255,609,1361,7127,1203,700,5507,3190,7119,3488,1113,7966,1532,1503,2302,662,2273,2631,1503,1311,3105,2319,1374,3612,7763,3049,1534,2032,6350,2864,1255,1333,2022,1552,626,8858,996,1750,6999,1995,1199,1331,2278,5003,3552,1928,2964,1546,683,12389,4712,1553,1372,2578,3979,6758,3234,5954,5433,806,1082,2788,2930,1927,2820,937,1056,3124,1388,2384,2133,2039,2799,1289,1217,2246,385,1965,1572,2718,1358,931,1442,4241,2775,3863,2329,918,1837,3349,1275,2828,4526,2671,2051,1300,741,1240,3357,3632,1808,12204,9157,3676,3441,640,3652,1530,3914,1858,2600,1979,2116,1437,4042,3832,3660,1553,1444,1980,1355,1393,1376,15653,1493,4370,750,1308,4623,1851,1880,7980,4583,1386,947,684,7476,1922,2303,8086,2346,3973,888,10222,4221,6361,1297,900,2241,1050,1047,6314,3496,3609,4843,3017,4139,5742,10366,2080,2580,4530,5150,5595,2384,1453,1538,2279,1478,5103,9857,6527,1347,2862,2753,3651,975,2631,2896,4716,2284,1236,1103,926,1800,1905,1123,6331,1377,2503,2528,5324,6560,2969,1206,2118,629,1198,2476,1138,14027,7596,3077,1505,3148,6148,1337,433,1228,790,2570,250,1316,1882,6416,1275,6403,1987,760,2603,3380,3990,11560,4380,6761,4280,2325,1048,3160,2483,14179,1797,2511,1274,5248,3029,428,976,841,5771,1555,1285,1299,1271,1393,691,5045,2124,2214,12680,2463,1155,3108,2901,3617,1655,2812,8065,3275,2223,1480,1371,3535,3509,5711,3872,4933,1940,1410,836,6468,1941,2675,2751,6224,5998,1188,6313,1221,2892,3062,2301,7511,1258,717,1549,1597,1795,4272,976,7472,9271,590,930,9283,1778,907,484,9629,3051,3931,7432,1338,1554,15857,1345,1101,3016,2712,731,3780,1602,3966,4165,8335,6681,2375,1216,11816,5084,2327,1082,886,601,2957,2611,5179,2993,1943,1559,3422,3976,6761,1249,1364,709,2235,4042,1471,1442,10875,1474,894,3343,3959,3577,5804,2169,2439,4526,2210,2221,2389,3331,7409,652,7678,1343,1382,874,3590,1322,1940,3595,1422,6742,7814,9277,2181,1098,4057,795,2825,15672,6614,7824,2442,1829,2171,5800,1169,8947,2606,1592,2186,4153,2625,3485,10477,1386,1278,1107,3763,3711,3594,3195,4454,4736,2991,2142,3161,18424,2848,14896,2359,3345,1817,12749,1366,2002,6872,697,1049,10297,1867,1344,1747,1670,1224,522,1498,1919,745,2063,6288,6842,3527,1546,929,1455,1845,8358,3349,2859,1533,3621,3590,2145,4113,10974,1893,1231,3656,1154,4006,3069,1740,2353,3556,2397,454,1715,2520,3568,7166,3939,1514,7393,1193,7297,2831,1258,753,2427,2538,1264,8386,4844,2923,8229,2028,1433,6289,1409,6579,1743,3565,1569,1936,3959,2390,1736,3857,804,1845,4576],"installment_rate":[4,2,2,2,3,2,3,2,2,4,3,3,1,4,2,4,4,2,4,3,4,2,1,3,2,1,4,3,3,3,3,2,2,4,4,4,1,4,2,4,4,3,2,1,4,4,4,1,1,4,4,1,3,2,4,1,2,2,3,4,2,4,4,2,4,4,2,4,4,4,1,4,3,2,4,4,4,2,2,2,1,4,3,4,3,4,4,1,4,4,4,4,4,4,4,3,4,4,4,3,4,4,3,4,2,2,2,2,1,1,1,4,3,4,3,4,4,2,1,3,3,4,3,4,4,4,4,4,4,3,1,4,2,4,2,4,2,4,4,2,2,4,3,2,4,4,1,4,3,4,2,1,4,2,4,2,3,4,2,1,3,4,4,2,4,1,4,4,2,4,4,4,3,4,2,4,2,4,4,4,1,2,4,4,4,4,2,2,4,1,2,4,4,2,4,2,1,4,4,4,4,4,3,4,4,3,4,4,2,3,1,2,2,4,4,1,3,2,2,2,4,4,4,4,3,4,1,4,4,4,4,2,3,4,2,4,1,4,4,1,4,3,3,3,4,4,4,4,2,3,3,1,4,2,2,1,4,4,1,4,2,4,2,2,3,4,4,4,1,4,4,3,4,4,1,1,2,2,1,4,3,4,4,4,4,1,4,2,4,4,2,1,2,4,4,1,1,4,3,3,1,4,4,4,2,4,2,4,3,4,3,4,2,2,1,4,2,1,4,1,4,4,2,4,4,1,2,4,4,4,2,4,4,2,3,1,2,4,4,4,2,1,1,1,1,4,4,1,1,4,1,1,2,4,4,4,1,4,4,4,4,2,2,1,4,2,3,1,4,2,4,3,1,2,3,2,2,3,4,4,4,3,4,4,2,2,4,4,2,3,2,1,2,1,2,2,3,3,1,4,3,4,2,4,4,1,4,4,3,4,4,3,4,3,4,2,4,1,1,4,2,4,2,4,1,1,4,4,1,2,1,2,4,4,3,2,2,4,4,4,4,2,2,4,2,4,4,2,3,3,4,3,2,4,2,4,2,3,4,3,1,2,3,4,4,3,4,3,2,3,3,4,4,4,4,1,4,4,3,4,1,4,4,3,4,4,2,4,3,2,2,2,1,4,3,2,4,4,4,2,4,2,2,4,4,4,2,1,4,4,4,2,2,4,4,4,2,2,3,4,3,2,3,3,4,2,4,2,4,3,3,2,4,4,4,2,4,3,4,1,1,4,4,2,4,4,4,3,4,2,4,2,1,4,4,2,3,1,3,2,4,4,2,1,4,3,2,2,4,3,4,3,2,4,4,2,2,3,4,4,3,1,4,4,4,1,2,4,4,3,4,4,4,3,4,1,4,1,2,1,1,4,4,4,4,4,3,4,4,4,4,1,4,1,4,2,2,1,2,4,2,3,4,4,4,4,2,2,4,1,2,4,4,2,3,4,4,2,4,3,4,4,3,4,4,4,2,2,4,4,4,4,4,2,4,1,4,4,2,2,3,4,4,4,2,4,4,1,3,4,3,2,2,1,4,4,4,2,4,3,1,4,4,3,1,4,4,4,3,1,2,3,2,1,4,2,4,1,4,4,4,4,4,4,4,1,3,4,4,2,4,4,4,4,4,1,3,4,3,3,4,4,4,4,3,2,2,4,4,2,1,2,4,2,1,3,1,3,1,4,2,4,4,4,4,3,1,3,1,2,2,1,2,4,4,4,1,3,2,4,1,4,4,4,4,3,2,1,1,2,2,3,1,4,2,4,4,4,4,2,2,4,2,4,1,4,3,4,4,4,2,3,1,3,4,2,1,2,4,4,4,3,1,4,1,2,3,4,1,2,3,3,4,3,4,2,1,1,2,4,3,3,2,4,3,4,1,2,3,4,4,4,2,2,2,4,4,1,4,4,4,3,4,4,4,2,2,4,3,4,4,3,4,4,2,4,4,4,3,1,4,4,4,4,2,2,4,2,3,4,2,1,4,4,2,4,3,4,3,2,3,2,4,4,3,4,4,2,4,3,4,4,4,3,4,3,4,3,1,2,2,2,2,4,4,2,2,2,1,1,4,2,2,1,4,1,1,1,1,4,4,4,3,3,2,4,4,4,4,4,4,4,3,4,4,4,3,4,4,2,2,3,4,2,4,1,4,4,4,2,3,2,3,4,4,4,4,2,3,4,2,1,3,3,3,4,4,4,2,1,4,1,1,4,4,3,2,4,4,2,2,3,1,2,2,4,2,2,4,4,2,4,2,4,4,3,4,4,4,3],"present_residence":[4,2,3,4,4,4,4,2,4,2,1,4,1,4,4,2,4,3,2,2,4,3,3,4,1,2,4,3,2,4,3,2,2,4,1,2,3,2,2,3,2,1,4,4,4,4,4,2,4,2,2,2,2,1,4,2,1,2,2,4,1,4,4,2,4,4,2,1,4,4,2,2,4,1,4,4,3,4,2,1,1,3,4,4,4,2,1,4,3,3,4,3,3,4,4,4,2,4,4,4,4,4,2,3,4,3,4,2,2,2,2,4,3,2,1,1,3,3,4,3,2,2,2,4,3,2,2,2,2,2,2,3,3,4,4,2,2,3,2,2,2,1,2,2,4,2,4,3,2,4,4,4,1,4,4,4,4,1,3,2,4,1,3,4,4,2,2,1,4,4,3,1,2,2,1,1,1,4,2,4,1,2,2,4,4,2,4,3,1,4,3,4,2,2,4,3,1,4,4,3,2,3,4,4,1,4,4,3,2,2,2,4,4,4,2,3,1,2,2,4,1,4,2,4,2,2,2,4,2,1,2,4,1,2,1,2,2,2,2,3,2,2,4,2,3,1,4,1,2,4,4,2,2,3,1,1,2,1,4,4,2,4,4,4,4,3,4,3,4,2,3,4,4,4,1,2,2,4,4,4,4,2,4,4,2,1,3,4,4,4,2,4,4,4,2,2,4,2,4,2,4,1,2,3,2,2,4,3,4,4,4,1,4,3,2,4,3,4,2,4,2,3,1,2,3,4,4,3,2,4,4,2,2,4,4,4,4,2,4,2,4,4,3,1,1,2,4,4,2,3,4,2,4,2,4,2,4,2,2,4,4,3,2,2,1,4,1,4,2,4,4,4,3,4,4,4,3,4,2,4,4,4,4,1,2,1,2,4,4,2,2,4,4,4,3,3,4,2,1,1,4,4,2,2,4,1,4,2,2,2,4,2,2,2,2,2,1,2,2,2,3,2,3,3,2,3,2,3,4,4,4,3,4,2,2,1,4,4,4,1,4,3,3,4,3,4,4,2,4,3,2,1,4,4,3,1,2,4,1,2,2,3,1,4,1,4,2,3,2,3,2,4,3,4,2,4,4,2,4,4,1,1,4,2,4,4,4,4,2,3,2,4,1,4,2,4,1,3,2,4,1,4,4,4,4,4,2,2,2,2,2,2,4,4,1,3,4,4,2,4,4,2,4,4,4,3,3,1,4,4,1,4,4,3,2,1,3,4,4,1,1,4,4,1,4,2,4,1,4,1,4,4,1,1,4,1,3,4,4,2,4,4,1,4,2,2,3,2,1,2,4,2,4,4,4,3,1,2,4,3,3,3,2,1,4,4,2,1,3,3,3,4,4,4,3,1,4,4,2,2,1,1,4,2,2,4,2,4,1,4,3,4,2,4,1,2,2,3,4,2,3,2,2,1,4,2,2,3,4,4,4,3,1,2,4,4,1,4,3,2,1,4,2,2,1,4,2,2,3,4,1,2,1,4,3,4,4,3,1,1,4,2,2,1,4,2,2,1,4,4,3,2,4,2,2,4,4,2,4,1,2,4,3,3,3,4,2,3,4,3,3,2,1,3,2,4,3,2,2,4,4,4,2,2,1,4,2,3,4,2,3,4,4,4,2,4,2,2,2,4,2,2,2,3,3,2,2,4,3,4,2,4,2,4,1,2,4,4,3,4,3,4,3,4,4,1,4,1,3,2,1,2,4,2,4,4,1,4,2,3,4,4,3,4,3,3,4,4,4,4,4,2,4,4,4,4,4,1,2,4,2,4,2,2,4,2,4,3,4,3,4,4,2,4,3,4,4,4,4,2,4,4,4,4,2,1,3,4,2,1,2,3,4,4,4,2,4,2,3,3,2,1,2,4,2,3,4,2,4,4,2,3,4,4,3,4,2,3,4,3,2,2,4,4,4,3,4,2,4,4,2,4,4,4,2,3,3,2,2,2,2,2,4,2,2,4,1,4,2,4,4,4,1,1,2,4,4,2,2,3,3,4,4,4,3,4,3,2,4,4,4,4,4,4,3,2,4,2,4,3,4,4,4,2,1,2,2,2,2,2,4,4,4,2,2,2,2,4,1,2,2,1,4,4,1,2,4,4,4,2,1,2,1,4,1,3,2,3,4,4,3,2,2,1,1,1,4,4,1,4,3,1,4,2,4,4,4,4,2,4,2,4,2,2,1,1,2,2,4,2,2,4,4,4,2,3,3,2,4,2,2,2,1,2,2,3,1,4,2,2,1,4,4,3,3,4,4,4,4,4],"age":[67,22,49,45,53,35,53,35,61,28,25,24,22,60,28,32,53,25,44,31,48,44,48,44,26,36,39,42,34,63,36,27,30,57,33,25,31,37,37,24,30,26,44,24,58,35,39,23,39,28,29,30,25,31,57,26,52,31,23,23,27,50,61,25,26,48,29,22,37,25,30,46,51,41,40,66,34,51,39,22,44,47,24,58,52,29,27,47,30,28,56,54,33,20,54,58,61,34,36,36,41,24,24,35,26,39,39,32,30,35,31,23,28,25,35,47,30,27,23,36,25,41,24,63,27,30,40,30,34,29,24,29,27,47,21,38,27,66,35,44,27,30,27,22,23,30,39,51,28,46,42,38,24,29,36,20,48,45,38,34,36,30,36,70,36,32,33,20,25,31,33,26,34,33,26,53,42,52,31,65,28,30,40,50,36,31,74,68,20,33,54,34,36,29,21,34,28,27,36,40,52,27,26,21,38,38,43,26,21,55,33,45,50,66,51,39,31,23,24,64,26,23,30,32,30,27,27,53,22,22,26,51,35,25,42,30,23,61,35,39,29,51,24,27,35,25,52,35,26,22,39,46,24,35,24,27,35,29,23,57,27,55,36,57,32,37,36,38,45,25,32,37,36,28,34,32,26,49,32,29,23,50,49,63,37,35,26,31,49,48,26,28,44,56,46,26,20,45,43,32,54,42,37,49,44,33,24,33,24,22,40,25,26,25,29,31,38,48,32,27,28,32,34,28,36,39,49,34,31,28,75,30,24,24,23,44,23,24,28,31,24,26,25,33,37,43,23,23,34,32,23,29,38,28,46,23,49,26,28,23,61,37,36,21,25,36,27,22,42,40,36,33,23,63,60,37,34,36,57,52,39,38,25,26,26,25,21,40,27,27,30,19,39,31,31,32,55,46,46,43,39,28,27,27,43,22,43,27,26,28,20,35,42,40,35,35,33,23,31,33,20,30,47,34,25,21,29,46,20,55,74,29,36,33,25,25,23,37,65,26,39,30,29,41,30,41,34,35,55,61,30,29,34,35,31,29,36,35,27,32,37,36,34,38,34,63,29,32,26,35,22,23,28,36,33,26,24,25,39,44,23,26,57,30,44,47,52,62,35,26,26,42,27,38,39,20,29,40,32,28,27,42,49,38,24,27,36,34,28,45,26,32,26,20,54,37,40,23,43,36,44,24,53,23,26,30,31,42,31,41,32,28,41,26,25,33,75,37,42,45,23,60,31,34,61,43,37,32,24,35,23,45,34,27,67,22,28,29,27,31,49,24,29,37,37,23,36,34,41,31,23,38,26,22,27,24,27,33,27,27,30,49,26,33,52,20,36,21,47,60,58,42,36,20,40,32,23,36,31,32,45,30,34,28,23,22,74,50,33,45,22,48,29,22,22,48,27,37,21,49,27,32,38,22,65,35,41,29,36,64,28,44,23,19,25,47,28,21,34,26,27,38,40,33,32,27,32,26,38,40,50,37,45,42,35,22,41,37,28,41,23,23,50,35,50,27,34,27,43,47,27,31,42,24,41,26,33,24,64,26,56,37,33,47,31,34,27,30,35,31,25,25,29,44,28,50,29,38,24,40,29,46,47,41,32,35,24,25,25,37,32,35,46,25,27,63,40,32,31,31,34,24,24,66,21,41,47,25,59,36,33,21,44,28,37,29,23,35,45,26,32,23,41,22,30,28,23,37,26,33,49,23,23,25,55,32,74,39,31,35,59,24,24,30,27,40,31,31,28,63,26,25,36,52,66,25,37,25,38,67,25,60,31,23,60,35,40,38,50,27,39,41,27,51,32,22,51,22,54,35,54,48,24,35,24,24,26,65,55,26,26,28,24,54,46,54,62,24,43,26,27,24,41,47,35,30,33,36,47,38,44,23,29,42,25,48,21,23,63,46,29,28,23,50,47,35,68,28,59,57,33,43,35,32,45,33,40,28,29,26,27,28,35,32,25,20,27,42,37,24,40,46,26,24,29,40,36,28,27,36,38,48,36,65,43,53,34,23,34,40,43,46,38,34,29,31,28,35,33,42,43,44,42,40,36,20,24,27,46,33,34,25,25,28,31,32,32,68,33,39,28,37,22,30,55,46,21,39,58,43,24,22,30,42,23,30,28,30,42,46,45,31,31,42,46,30,30,38,43,31,40,24,28,26,29,57,49,37,45,30,30,47,29,35,22,26,23,54,29,40,22,43,29,36,33,57,64,42,47,25,49,33,28,26,30,25,33,64,29,48,37,34,23,30,50,31,40,38,23,27],"number_credits":[2,1,1,1,2,1,1,1,1,2,1,1,1,2,1,1,2,3,1,1,3,1,2,1,2,1,1,2,1,2,1,1,2,1,1,2,1,1,1,1,1,1,1,2,2,2,1,1,2,1,1,2,1,1,2,1,1,2,1,2,1,2,1,1,1,4,1,1,1,1,1,2,2,2,1,2,1,1,1,1,2,1,1,1,1,2,2,1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,2,2,1,1,1,2,1,1,2,1,1,1,2,2,1,2,2,1,2,1,2,1,1,2,2,1,1,2,2,1,2,2,1,3,1,1,1,1,1,1,1,2,2,2,2,1,1,1,1,1,1,2,1,2,2,1,2,2,1,1,1,1,1,1,2,2,1,1,1,2,1,1,2,2,2,2,2,2,1,1,2,1,3,1,2,3,1,1,1,1,2,2,4,1,1,2,1,2,1,2,3,3,1,1,1,2,1,2,1,1,2,1,1,1,1,1,1,2,2,1,2,2,1,1,1,1,1,1,1,3,1,1,2,2,1,1,1,2,2,1,1,3,1,1,1,2,1,1,2,1,1,2,1,1,3,1,1,3,3,2,1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1,2,1,1,1,1,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,1,1,1,1,2,2,1,2,2,1,1,1,1,1,2,1,1,1,1,1,2,1,2,2,1,1,1,2,1,1,1,2,1,1,1,1,2,1,1,1,2,1,1,1,1,2,2,1,2,1,2,1,1,2,1,1,1,1,2,2,1,2,1,2,1,1,1,1,1,1,1,2,2,2,1,2,2,2,1,1,2,1,1,3,1,2,2,1,1,2,1,2,1,1,1,1,2,2,1,1,2,2,1,3,1,2,3,2,1,1,1,2,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,1,1,1,1,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,1,2,1,1,2,2,1,1,1,1,1,1,2,2,2,1,2,1,1,2,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,2,1,2,2,1,2,1,1,2,1,2,1,1,2,2,1,1,2,1,1,1,1,1,1,2,1,1,2,2,1,1,1,2,2,1,2,1,2,1,2,2,1,2,1,1,1,1,2,2,1,1,2,1,1,1,1,1,2,2,1,2,2,2,2,2,1,1,1,1,2,1,1,2,4,2,1,1,1,1,2,3,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,2,2,1,1,2,1,1,1,2,1,1,1,1,2,1,3,1,2,1,2,1,2,1,2,2,2,2,1,1,1,1,1,1,4,2,1,1,1,2,1,1,1,2,2,1,2,1,1,2,1,2,2,1,1,1,1,1,1,1,1,1,1,2,3,2,1,2,1,1,1,2,1,1,2,1,1,2,1,2,1,1,2,1,2,1,1,1,2,1,1,2,1,1,2,1,2,2,1,2,2,2,1,1,1,1,2,2,2,1,2,1,1,1,1,1,1,2,1,2,2,1,1,1,1,2,2,1,1,1,1,1,1,1,2,2,1,3,2,1,2,1,2,1,1,2,2,1,1,3,2,1,2,1,2,3,1,2,1,2,1,2,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,2,1,2,2,2,2,1,1,1,4,1,2,1,1,2,1,1,1,1,2,1,1,2,1,1,2,2,2,3,2,1,1,2,1,2,1,1,2,1,1,2,2,1,2,1,1,3,1,2,1,1,1,2,2,2,2,2,1,1,1,1,1,2,1,1,2,1,1,1,1,2,1,2,2,2,1,1,2,1,1,1,2,1,1,2,2,1,1,2,1,2,2,4,2,2,2,2,1,1,1,1,1,1,2,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,3,1,2,1,1,2,2,1,2,1,1,1,2,1,1,1,3,1,2,1,1,1,2,3,2,1,2,1,2,2,3,1,1,2,2,1,2,1,1,2,1,1,2,1,1,2,1,1,1,1,2,2,1,1,1,1,1,2,2,2,1,1,2,2,1,2,1,1,1,1,1,1,1],"people_liable":[1,1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,2,2,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,2,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,2,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1,2,1,2,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,2,1,2,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1,2,2,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,2,1,2,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,2,1,2,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,2,1,1,2,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,2,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,2,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,2,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1,2,2,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,2,2,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,1,2,2,2,1,2,1,1,2,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1],"good":[1,0,1,1,0,1,1,1,1,0,0,0,1,0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,1,1,0,1,0,1,0,1,1,1,0,1,1,0,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1,0,1,0,0,1,1,1,1,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1,1,0,0,0,1,1,0,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,0,0,1,0,1,1,0,0,1,1,1,1,0,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1,0,1,0,1,1,0,1,1,1,1,0,1,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,1,1,0,0,1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,0,1,1,1,0,1,1,0,0,0,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,0,0,1,1,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1,0,1,0,0,1,0,1,1,0,1,1,1,0,1,1,0,0,0,0,0,1,0,1,0,1,1,0,1,1,0,0,1,1,1,1,1,1,1,0,1,0,1,1,0,1,0,1,1,0,0,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,1,1,0,0,1,1,0,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,0,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,0,0,0,1,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,0,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,0,0,1,0,1,0,1,0,1,0,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,0,0,0,1,1,1,1,0,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,1,1,1,0,1,0,1,1,1,0,1,1,0,0,1,1,0,1,1,1,1,0,1,1,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1,0,0,0,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,1,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1]};
+const COLS = [['duration', 'Duration'], ['amount', 'Amount'], ['installment_rate', 'Instalment'], ['present_residence', 'Residence'], ['age', 'Age'], ['number_credits', 'Credits'], ['people_liable', 'Dependants']];
+function ranks(a){ const idx = a.map((v, i) => [v, i]).sort((x, y) => x[0] - y[0]), r = new Array(a.length); for (let i = 0; i < idx.length;) { let j = i; while (j + 1 < idx.length && idx[j + 1][0] === idx[i][0]) j++; const avg = (i + j) / 2 + 1; for (let k = i; k <= j; k++) r[idx[k][1]] = avg; i = j + 1; } return r; }
+function pearson(x, y){ const n = x.length; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n; let sxy = 0, sx = 0, sy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sx += a * a; sy += b * b; } return sxy / Math.sqrt(sx * sy); }
+const RK = COLS.map(([k]) => ranks(D[k]));
+const cellColor = v => { const a = Math.min(1, Math.abs(v) / 0.7); return v >= 0 ? `rgba(47,107,255,${0.1 + a * 0.9})` : `rgba(255,107,61,${0.1 + a * 0.9})`; };
+let html = '<div class="h"></div>' + COLS.map(c => `<div class="h">${c[1]}</div>`).join('');
+COLS.forEach((ci, i) => { html += `<div class="h">${ci[1]}</div>`; COLS.forEach((cj, j) => { const v = i === j ? 1 : pearson(RK[i], RK[j]); html += `<div class="c" tabindex="0" style="background:${cellColor(v)};color:${Math.abs(v) > 0.3 ? '#fff' : 'var(--ink)'}" data-t="${ci[1]} and ${cj[1]}" data-v="${v.toFixed(2)}">${i === j ? '' : v.toFixed(2)}</div>`; }); });
+$('heat').innerHTML = html;
+function read(e){ const c = e.target.closest('.c'); if (!c) return; const v = +c.dataset.v; $('readout').innerHTML = c.dataset.v === '1.00' ? `<b>${c.dataset.t}</b>: a column always correlates perfectly with itself.` : `<b>${c.dataset.t}</b>: ρ = <span class="mono">${c.dataset.v}</span>. ${Math.abs(v) < 0.1 ? 'Almost no relationship.' : (v > 0 ? 'When one goes up, the other tends to go up too.' : 'When one goes up, the other tends to go down.')}`; }
+['mouseover', 'focusin', 'click'].forEach(ev => $('heat').addEventListener(ev, read));
+$('readout').innerHTML = 'Try <b>Duration and Amount</b>: longer loans tend to be bigger loans. That’s the kind of relationship a synthetic generator has to keep.';
+$('dpsBars').innerHTML = M.map(m => `<div class="row"><span><span class="dot" style="--c:${m.c}"></span>${m.name}</span><div class="track">${m.nan ? '<div class="nanfill"></div>' : `<div class="fill" style="--c:${m.c}" data-w="${m.dps * 100}"></div>`}</div><span class="mono">${m.nan ? 'NaN' : m.dps.toFixed(4)}</span></div>`).join('');
+const good = D.good.reduce((a, b) => a + b, 0), bad = D.good.length - good;
+$('stackReal').innerHTML = `<div style="flex:${good};background:var(--blue)">Good ${Math.round(good / D.good.length * 100)}%</div><div style="flex:${bad};background:var(--smote)">Bad ${Math.round(bad / D.good.length * 100)}%</div>`;
+$('realCounts').textContent = `${good} good and ${bad} bad credit applicants out of ${D.good.length}, counted live from the dataset.`;
+
+/* ---------- deluxe: charts drawn straight from the experiment results ---------- */
+const X = {"definitions":{"data":"German Credit (UCI Statlog), 1,000 rows, from a public CSV copy with readable labels.","target":"bad credit = 1, good credit = 0 (as in the paper).","split":"stratified 80/20 train/test per seed; generators see only the training split.","model":"XGBoost with library defaults (the paper used AutoGluon, which selected XGBoost).","balancing":"SMOTE, CTGAN, TVAE and Gaussian Copula add synthetic bad-credit rows to the real training set until the classes are 50/50.","protected":"sex, derived from personal_status_sex: female = \"female : divorced/separated/married\", male = every other value (the paper notes this attribute is composite). Age group (25 or under) is reported as an extra attribute.","approval":"predicted good credit (probability of bad credit below 0.5).","disparate_impact":"approval rate of women divided by approval rate of men (closer to 1 is fairer).","equalized_odds":"the larger of the true positive rate gap and the false positive rate gap between groups (lower is fairer).","predictive_parity":"absolute gap in precision of approvals between groups (lower is fairer).","dps":"numerical part: 1 minus the mean absolute difference between the Spearman correlations of each numeric pair in real vs synthetic rows; categorical part: the same with Cramer's V for each categorical pair; DPS = average of the two. 1 means identical dependencies. This is our reading of the paper's description, not its exact code.","frobenius":"Frobenius norm of (real Spearman matrix minus synthetic Spearman matrix) over the numeric columns; lower is better.","smote":"SMOTE runs on the one-hot data without scaling (as in the paper), so loan amount, in the thousands, dominates which neighbours it picks; SMOTE-NC uses the same numeric distances, so the two produce near-identical numeric values.","validity":"a run counts as degenerate when any generated column other than the requested label never varies.","seeds":"every method ran on the same 20 train/test splits (seeds 0-19), so the significance tests are paired.","dcr":"distance to closest record: for each synthetic row, the distance to its nearest real training row in standardized one-hot space. Compared with the same distance for real held-out rows."},"n_seeds":20,"methods":{"baseline":{"n":20,"problems":[],"auc":[0.7702,0.0275],"di":[0.8658,0.0678],"eo":[0.1907,0.1043],"pp":[0.0731,0.0409],"di_age":[0.8049,0.1108],"eo_age":[0.177,0.0899],"pp_age":[0.1264,0.0774],"dps":[1.0,0.0],"frob":[0.0,0.0]},"baseline_oversampled":{"n":20,"problems":[],"auc":[0.7694,0.0309],"di":[0.882,0.0951],"eo":[0.1592,0.1008],"pp":[0.0696,0.0436],"di_age":[0.7992,0.1205],"eo_age":[0.1729,0.0895],"pp_age":[0.1314,0.0764],"p_vs_baseline":{"auc":0.7012,"di":0.33,"eo":0.0897,"pp":0.6215}},"baseline_weighted":{"n":20,"problems":[],"auc":[0.7724,0.0286],"di":[0.8903,0.0969],"eo":[0.157,0.1129],"pp":[0.0668,0.0445],"di_age":[0.7916,0.1267],"eo_age":[0.1707,0.0903],"pp_age":[0.1253,0.0771],"p_vs_baseline":{"auc":0.4091,"di":0.1536,"eo":0.1231,"pp":0.498}},"ctgan":{"n":20,"problems":[],"auc":[0.7558,0.0246],"di":[0.8902,0.1049],"eo":[0.1563,0.0843],"pp":[0.0749,0.0398],"di_age":[0.8042,0.1335],"eo_age":[0.1587,0.0895],"pp_age":[0.143,0.0699],"dps":[0.9118,0.004],"frob":[1.1618,0.0573],"dcr_syn_median":[6.6497,0.1293],"dcr_real_median":[5.7027,0.1373],"exact_copies":[0.0,0.0],"p_vs_baseline":{"auc":0.0441,"di":0.2024,"eo":0.0534,"pp":0.8695}},"gaussian_copula":{"n":20,"problems":[],"auc":[0.7498,0.029],"di":[0.8715,0.1028],"eo":[0.1708,0.0786],"pp":[0.0694,0.0435],"di_age":[0.7502,0.125],"eo_age":[0.1807,0.1018],"pp_age":[0.1564,0.0702],"dps":[0.9365,0.0048],"frob":[0.6126,0.0716],"dcr_syn_median":[6.3205,0.0748],"dcr_real_median":[5.7027,0.1373],"exact_copies":[0.0,0.0],"p_vs_baseline":{"auc":0.0027,"di":0.7841,"eo":0.2943,"pp":0.4749}},"mix_ctgan_100":{"n":20,"problems":[],"auc":[0.4966,0.0452],"di":[1.0356,0.1002],"eo":[0.1199,0.0497],"pp":[0.0907,0.0634],"di_age":[1.0232,0.1645],"eo_age":[0.1806,0.0989],"pp_age":[0.1827,0.0693],"p_vs_baseline":{"auc":0.0,"di":0.0,"eo":0.0637,"pp":0.2774}},"mix_ctgan_25":{"n":20,"problems":[],"auc":[0.7496,0.0305],"di":[0.8914,0.0741],"eo":[0.1463,0.0875],"pp":[0.0556,0.0361],"di_age":[0.8437,0.0897],"eo_age":[0.1799,0.098],"pp_age":[0.1447,0.095],"p_vs_baseline":{"auc":0.0038,"di":0.3144,"eo":0.1165,"pp":0.1536}},"mix_ctgan_50":{"n":20,"problems":[],"auc":[0.717,0.0373],"di":[0.9333,0.0785],"eo":[0.1349,0.084],"pp":[0.0627,0.0403],"di_age":[0.9133,0.1088],"eo_age":[0.1429,0.0838],"pp_age":[0.1541,0.0791],"p_vs_baseline":{"auc":0.0,"di":0.0042,"eo":0.0296,"pp":0.3884}},"mix_ctgan_75":{"n":20,"problems":[],"auc":[0.6476,0.043],"di":[0.9197,0.0758],"eo":[0.1156,0.0737],"pp":[0.0687,0.056],"di_age":[0.9142,0.1059],"eo_age":[0.1647,0.0868],"pp_age":[0.1593,0.079],"p_vs_baseline":{"auc":0.0,"di":0.0094,"eo":0.0012,"pp":0.7012}},"mix_gaussian_copula_100":{"n":20,"problems":[],"auc":[0.5715,0.0507],"di":[0.9777,0.0916],"eo":[0.1128,0.0635],"pp":[0.0792,0.0568],"di_age":[0.9039,0.1428],"eo_age":[0.2001,0.1102],"pp_age":[0.1819,0.091],"p_vs_baseline":{"auc":0.0,"di":0.0023,"eo":0.0215,"pp":0.6742}},"mix_gaussian_copula_25":{"n":20,"problems":[],"auc":[0.756,0.0333],"di":[0.8779,0.0778],"eo":[0.172,0.1169],"pp":[0.0533,0.039],"di_age":[0.8294,0.1157],"eo_age":[0.1681,0.115],"pp_age":[0.1352,0.085],"p_vs_baseline":{"auc":0.0121,"di":0.498,"eo":0.4749,"pp":0.0192}},"mix_gaussian_copula_50":{"n":20,"problems":[],"auc":[0.7298,0.036],"di":[0.9051,0.096],"eo":[0.1717,0.0886],"pp":[0.0519,0.0405],"di_age":[0.8355,0.1124],"eo_age":[0.1458,0.078],"pp_age":[0.1394,0.0639],"p_vs_baseline":{"auc":0.0003,"di":0.1054,"eo":0.6009,"pp":0.0532}},"mix_gaussian_copula_75":{"n":20,"problems":[],"auc":[0.6646,0.0413],"di":[0.9163,0.0742],"eo":[0.1519,0.1117],"pp":[0.0636,0.0539],"di_age":[0.8665,0.0945],"eo_age":[0.1412,0.0678],"pp_age":[0.1586,0.0683],"p_vs_baseline":{"auc":0.0,"di":0.0215,"eo":0.2774,"pp":0.3488}},"mix_tvae_100":{"n":20,"problems":[],"auc":[0.7424,0.0307],"di":[0.9288,0.0809],"eo":[0.1395,0.0876],"pp":[0.0593,0.0465],"di_age":[0.8497,0.087],"eo_age":[0.1588,0.0886],"pp_age":[0.1362,0.0642],"p_vs_baseline":{"auc":0.0007,"di":0.0121,"eo":0.185,"pp":0.498}},"mix_tvae_25":{"n":20,"problems":[],"auc":[0.7651,0.0289],"di":[0.9031,0.1141],"eo":[0.2143,0.1256],"pp":[0.069,0.0515],"di_age":[0.8502,0.1025],"eo_age":[0.1615,0.0767],"pp_age":[0.142,0.0833],"p_vs_baseline":{"auc":0.3905,"di":0.165,"eo":0.4445,"pp":0.5706}},"mix_tvae_50":{"n":20,"problems":[],"auc":[0.759,0.0409],"di":[0.9392,0.087],"eo":[0.1405,0.0749],"pp":[0.0601,0.0431],"di_age":[0.8644,0.0772],"eo_age":[0.1374,0.0569],"pp_age":[0.14,0.0758],"p_vs_baseline":{"auc":0.2024,"di":0.0037,"eo":0.1429,"pp":0.3488}},"mix_tvae_75":{"n":20,"problems":[],"auc":[0.7464,0.0332],"di":[0.9094,0.0941],"eo":[0.146,0.0998],"pp":[0.0667,0.044],"di_age":[0.8652,0.1212],"eo_age":[0.1377,0.0975],"pp_age":[0.1383,0.0744],"p_vs_baseline":{"auc":0.0121,"di":0.0936,"eo":0.0973,"pp":0.8124}},"reweighing":{"n":20,"problems":[],"auc":[0.7708,0.0267],"di":[0.9087,0.0766],"eo":[0.1392,0.0963],"pp":[0.0643,0.0425],"di_age":[0.8296,0.1027],"eo_age":[0.1573,0.0746],"pp_age":[0.1376,0.0802],"p_vs_baseline":{"auc":0.658,"di":0.0038,"eo":0.0172,"pp":0.4091}},"smote":{"n":20,"problems":[],"auc":[0.7653,0.0307],"di":[0.8934,0.0872],"eo":[0.1904,0.1248],"pp":[0.0851,0.0481],"di_age":[0.8364,0.1182],"eo_age":[0.1494,0.0973],"pp_age":[0.1291,0.0754],"dps":[0.9209,0.0061],"frob":[0.7254,0.15],"dcr_syn_median":[2.9995,0.1406],"dcr_real_median":[5.7027,0.1373],"exact_copies":[0.0,0.0],"p_vs_baseline":{"auc":0.0619,"di":0.0702,"eo":0.9679,"pp":0.0532}},"smotenc":{"n":20,"problems":[],"auc":[0.7656,0.0307],"di":[0.8911,0.0865],"eo":[0.129,0.0768],"pp":[0.0508,0.035],"di_age":[0.8089,0.1255],"eo_age":[0.1584,0.1012],"pp_age":[0.1297,0.0698],"dps":[0.9289,0.0046],"frob":[0.725,0.1498],"dcr_syn_median":[11.1425,0.1306],"dcr_real_median":[5.7027,0.1373],"exact_copies":[0.0,0.0],"p_vs_baseline":{"auc":0.1893,"di":0.1769,"eo":0.0266,"pp":0.0532}},"tvae":{"n":20,"problems":["constant columns: savings, other_debtors, foreign_worker","constant columns: savings, other_debtors, other_installment_plans, foreign_worker","constant columns: savings, other_debtors, other_installment_plans, people_liable, foreign_worker"],"auc":[0.7694,0.0296],"di":[0.844,0.0855],"eo":[0.2085,0.1289],"pp":[0.0721,0.0511],"di_age":[0.7841,0.0842],"eo_age":[0.1667,0.1005],"pp_age":[0.1331,0.0579],"dps":[0.9117,0.0095],"frob":[0.6392,0.1112],"dcr_syn_median":[3.6915,0.0799],"dcr_real_median":[5.7027,0.1373],"exact_copies":[0.0,0.0],"p_vs_baseline":{"auc":0.9854,"di":0.1327,"eo":0.2774,"pp":0.9563}}}};
+const NAMES = { baseline: ['Baseline (original data)', 'var(--base)'], baseline_weighted: ['Baseline, class-weighted', 'var(--bw)'], baseline_oversampled: ['Baseline, random oversampling', 'var(--bo)'],
+  reweighing: ['Original data + reweighing', 'var(--rw)'], smote: ['SMOTE', 'var(--smote)'], smotenc: ['SMOTE-NC', 'var(--snc)'], ctgan: ['CTGAN', 'var(--ctgan)'], tvae: ['TVAE', 'var(--tvae)'], gaussian_copula: ['Gaussian Copula', 'var(--gc)'] };
+const XM = X.methods;
+$('dxMeta').textContent = `Each experiment ran ${X.n_seeds} times with different random seeds.`;
+$('defs').innerHTML = Object.entries(X.definitions).map(([k, v]) => `<dt style="font-weight:700;color:var(--ink);margin-top:10px">${k.replace(/_/g, ' ')}</dt><dd style="margin:2px 0 0">${v}</dd>`).join('');
+const fmt = (v, d = 3) => v == null ? '–' : v.toFixed(d);
+function dotplot(el, ids, key, opt){
+  const rows = ids.filter(id => XM[id] && XM[id][key]);
+  if (!rows.length) { el.innerHTML = ''; return; }
+  const vals = rows.flatMap(id => [XM[id][key][0] - XM[id][key][1], XM[id][key][0] + XM[id][key][1]]).concat(opt.ref != null ? [opt.ref] : []);
+  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * 0.12 || 0.01; lo -= pad; hi += pad;
+  const W = 640, L = 210, Rr = 50, rowH = 32, H = rows.length * rowH + 34, x = v => L + (v - lo) / (hi - lo) * (W - L - Rr);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.title}">`;
+  if (opt.ref != null) s += `<line x1="${x(opt.ref)}" x2="${x(opt.ref)}" y1="4" y2="${H - 26}" stroke="currentColor" stroke-dasharray="3 4" opacity=".35"/><text x="${x(opt.ref)}" y="${H - 8}" text-anchor="middle">${opt.refLabel || opt.ref}</text>`;
+  rows.forEach((id, i) => {
+    const [m, sd] = XM[id][key], y = 16 + i * rowH, c = NAMES[id][1];
+    s += `<text class="lab" x="${L - 12}" y="${y + 4}" text-anchor="end">${NAMES[id][0]}</text>`;
+    s += `<line x1="${x(m - sd)}" x2="${x(m + sd)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="6" stroke-linecap="round" opacity=".3"/>`;
+    s += `<circle cx="${x(m)}" cy="${y}" r="7" fill="${c}"/><text x="${x(m + sd) + 8}" y="${y + 4}">${fmt(m)}</text>`;
+  });
+  const nearRef = r => opt.ref != null && Math.abs(x(opt.ref) - r) < 70;
+  s += (nearRef(L) ? '' : `<text x="${L}" y="${H - 8}">${fmt(lo, 2)}</text>`) + (nearRef(W - Rr) ? '' : `<text x="${W - Rr}" y="${H - 8}" text-anchor="end">${fmt(hi, 2)}</text>`) + '</svg>';
+  el.innerHTML = s;
+}
+document.querySelectorAll('[data-dot]').forEach(el => { const [ids, key] = el.dataset.dot.split(':'); dotplot(el, ids.split(','), key, { title: el.dataset.title || key, ref: el.dataset.ref != null ? +el.dataset.ref : null, refLabel: el.dataset.refLabel }); });
+const PUB = { baseline: M[0], smote: M[1], ctgan: M[2] };
+const rt = $('reproTable');
+if (rt) rt.innerHTML = ['baseline', 'smote', 'ctgan', 'tvae', 'gaussian_copula'].map(id => {
+  const p = PUB[id], r = XM[id] || {}, cell = k => `<td class="m">${p && p[k] ? f3(p[k][0]) : 'NaN'}</td><td class="m"><b>${r[k] ? f3(r[k][0]) + ' ± ' + f3(r[k][1]) : (r.errors ? 'failed' : '–')}</b></td>`;
+  return `<tr><td><span class="dot" style="--c:${NAMES[id][1]}"></span>${NAMES[id][0]}</td>${cell('auc')}${cell('di')}${cell('eo')}</tr>`;
+}).join('');
+const st = $('sigTable');
+if (st) st.innerHTML = Object.keys(NAMES).filter(id => id !== 'baseline' && XM[id] && XM[id].p_vs_baseline).map(id => {
+  const p = XM[id].p_vs_baseline, c = k => p[k] == null ? '<td class="m">–</td>' : `<td class="m" style="${p[k] < 0.05 ? 'font-weight:700;color:var(--ink)' : 'color:var(--muted)'}">${p[k] < 0.001 ? '< 0.001' : p[k].toFixed(3)}${p[k] < 0.05 ? ' ✓' : ''}</td>`;
+  return `<tr><td><span class="dot" style="--c:${NAMES[id][1]}"></span>${NAMES[id][0]}</td>${c('auc')}${c('di')}${c('eo')}${c('pp')}</tr>`;
+}).join('');
+const mixEl = $('mixSlider');
+if (mixEl) {
+  let gen = 'ctgan';
+  const pts = (g, k) => [0, 25, 50, 75, 100].map(f => { const m = f === 0 ? XM.baseline : XM[`mix_${g}_${f}`]; return m && m[k] ? [f, m[k][0], m[k][1]] : null; }).filter(Boolean);
+  const at = (p, f) => { for (let i = 0; i < p.length - 1; i++) if (f >= p[i][0] && f <= p[i + 1][0]) { const t = (f - p[i][0]) / (p[i + 1][0] - p[i][0]); return [p[i][1] + t * (p[i + 1][1] - p[i][1]), t < .5 ? p[i] : p[i + 1]]; } return [p[p.length - 1][1], p[p.length - 1]]; };
+  const draw = () => {
+    const f = +mixEl.value; $('mixPct').textContent = f + '%';
+    [['auc', 'mixAuc'], ['di', 'mixDi'], ['eo', 'mixEo']].forEach(([k, id]) => { const p = pts(gen, k); if (!p.length) return; const [v, near] = at(p, f); $(id).textContent = v.toFixed(3); $(id + 'n').textContent = `measured at ${near[0]}%: ${near[1].toFixed(3)} ± ${near[2].toFixed(3)}`; });
+    const p = pts(gen, 'auc'); if (!p.length) return;
+    const W = 1000, H = 240, lo = Math.min(...p.map(q => q[1] - q[2])) - .01, hi = Math.max(...p.map(q => q[1] + q[2])) + .01, x = v => 60 + v / 100 * (W - 90), y = v => H - 34 - (v - lo) / (hi - lo) * (H - 64);
+    $('mixChart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ROC AUC as synthetic rows replace real ones"><path d="${p.map((q, i) => (i ? 'L' : 'M') + x(q[0]) + ' ' + y(q[1])).join(' ')}" fill="none" stroke="${NAMES[gen][1]}" stroke-width="3"/>` +
+      p.map(q => `<line x1="${x(q[0])}" x2="${x(q[0])}" y1="${y(q[1] - q[2])}" y2="${y(q[1] + q[2])}" stroke="${NAMES[gen][1]}" stroke-width="5" opacity=".3" stroke-linecap="round"/><circle cx="${x(q[0])}" cy="${y(q[1])}" r="5" fill="${NAMES[gen][1]}"/>`).join('') +
+      `<line x1="${x(f)}" x2="${x(f)}" y1="10" y2="${H - 32}" stroke="currentColor" opacity=".45"/><text x="60" y="${H - 8}">0% synthetic (all real)</text><text x="${W - 30}" y="${H - 8}" text-anchor="end">100% synthetic</text><text x="60" y="14" class="lab">ROC AUC on real held-out applicants</text><text x="4" y="${y(hi) + 4}">${hi.toFixed(2)}</text><text x="4" y="${y(lo) + 4}">${lo.toFixed(2)}</text></svg>`;
+  };
+  document.querySelectorAll('#mixGen button').forEach(b => b.addEventListener('click', () => { gen = b.dataset.g; document.querySelectorAll('#mixGen button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); draw(); }));
+  mixEl.addEventListener('input', draw); draw();
+}
+const bar = (id, label, c, v, max, d = 3) => `<div class="row"><span><span class="dot" style="--c:${c}"></span>${label}</span><div class="track"><div class="fill" style="--c:${c}" data-w="${Math.max(0, v) / max * 100}"></div></div><span class="mono">${v.toFixed(d)}</span></div>`;
+const GEN = ['smote', 'smotenc', 'ctgan', 'tvae', 'gaussian_copula'];
+if ($('privBars')) { const ids = GEN.filter(id => XM[id] && XM[id].dcr_syn_median); const ref = ids.length ? XM[ids[0]].dcr_real_median[0] : 1; const mx = Math.max(ref, ...ids.map(id => XM[id].dcr_syn_median[0])) * 1.1;
+  $('privBars').innerHTML = bar('real', 'Real held-out rows', 'var(--muted)', ref, mx, 2) + ids.map(id => bar(id, NAMES[id][0], NAMES[id][1], XM[id].dcr_syn_median[0], mx, 2)).join(''); }
+if ($('dpsNew')) $('dpsNew').innerHTML = GEN.filter(id => XM[id] && XM[id].dps).map(id => bar(id, NAMES[id][0], NAMES[id][1], XM[id].dps[0], 1)).join('');
+if ($('frobNew')) { const ids = GEN.filter(id => XM[id] && XM[id].frob); const mx = Math.max(...ids.map(id => XM[id].frob[0])) * 1.1; $('frobNew').innerHTML = ids.map(id => bar(id, NAMES[id][0], NAMES[id][1], XM[id].frob[0], mx)).join(''); }
+const growIn = root => root.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w + '%');
+if ('IntersectionObserver' in window) { const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { growIn(e.target); io.unobserve(e.target); } }), { threshold: .2 }); document.querySelectorAll('.bars').forEach(b => io.observe(b)); } else document.querySelectorAll('.bars').forEach(growIn);
+
+/* ---------- citation ---------- */
+$('copy').addEventListener('click', async () => {
+  const t = $('citeText').textContent;
+  try { await navigator.clipboard.writeText(t); $('copy').textContent = 'Copied ✓'; }
+  catch { const r = document.createRange(); r.selectNodeContents($('citeText')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('copy').textContent = 'Selected, press copy'; }
+  setTimeout(() => $('copy').textContent = 'Copy citation', 2200);
+});
+})();
+</script>
+</body>
+</html>
